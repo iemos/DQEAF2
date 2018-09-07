@@ -5,6 +5,7 @@ import gym
 import numpy as np
 import tensorflow as tf
 import gym_malware
+import logging
 
 # Hyper Parameters for DQN
 from hook.plot_hook import PlotHook
@@ -112,12 +113,16 @@ class DQN():
         # Step 2: calculate y
         y_batch = []
         Q_value_batch = self.Q_value.eval(feed_dict={self.state_input: next_state_batch})
+        Last_Q_value_batch = self.Q_value.eval(feed_dict={self.state_input: state_batch})
+        loss_sum = 0
         for i in range(0, BATCH_SIZE):
             done = minibatch[i][4]
             if done:
                 y_batch.append(reward_batch[i])
             else:
                 y_batch.append(reward_batch[i] + GAMMA * np.max(Q_value_batch[i]))
+            loss_sum += np.square(y_batch[i] - np.max(Last_Q_value_batch[i]))
+        self.update_average_loss(loss_sum)
 
         self.optimizer.run(feed_dict={
             self.y_input: y_batch,
@@ -137,20 +142,22 @@ class DQN():
             self.saver.save(self.session, 'saved_networks/' + 'network' + '-dqn', global_step=self.time_step)
 
     def egreedy_action(self, state):  # 输出带随机的动作
-        Q_value = self.Q_value.eval(feed_dict={
-            self.state_input: [state]
-        })[0]
-        self.MAX_Q = np.max(Q_value)
+        q_value = self.Q_value.eval(feed_dict={self.state_input: [state]})[0]
+        self.update_average_q(np.max(q_value))
         if random.random() <= self.epsilon:
+            self.epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / MAX_STEPS
             return random.randint(0, self.action_dim - 1)
         else:
-            return np.argmax(Q_value)
+            self.epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / MAX_STEPS
+            return np.argmax(q_value)
 
-        self.epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / 10000
-
-    def update_average_q(self):
+    def update_average_q(self, q):
         self.average_q *= AVERAGE_Q_DECAY
-        self.average_q += (1 - AVERAGE_Q_DECAY) * self.MAX_Q
+        self.average_q += (1 - AVERAGE_Q_DECAY) * q
+
+    def update_average_loss(self, loss_sum):
+        self.average_loss *= AVERAGE_LOSS_DECAY
+        self.average_loss += (1 - AVERAGE_LOSS_DECAY) * (loss_sum / BATCH_SIZE)
 
     #  print("update average q")
 
@@ -161,9 +168,7 @@ class DQN():
         self.test_steps_to_success = steps
 
     def action(self, state):  # 输出动作
-        return np.argmax(self.Q_value.eval(feed_dict={
-            self.state_input: [state]
-        })[0])
+        return np.argmax(self.Q_value.eval(feed_dict={self.state_input: [state]})[0])
 
     def get_statistics(self):
         return [
@@ -174,6 +179,7 @@ class DQN():
             ('average_q', self.average_q),
             ('steps to success', self.steps_to_success),
             ('steps to success(test)', self.test_steps_to_success),
+            ('average_loss', self.average_loss),
         ]
 
 
@@ -181,27 +187,31 @@ class DQN():
 ENV_NAME = 'malware-v0'
 ENV_TEST_NAME = 'malware-test-v0'
 EPISODE = 10000  # Episode limitation
-STEP = 80  # Step limitation in an episode
-TEST_SAMPLE_COUNT = 200
+MAX_STEPS = 30000  # Total steps limitation
+STEP = 60  # Step limitation in an episode
+TEST_SAMPLE_COUNT = 20
 
 
 def main():
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+
     # initialize OpenAI Gym env and dqn agent
     env = gym.make(ENV_NAME)
     env_test = gym.make(ENV_TEST_NAME)
     agent = DQN(env)
 
-    test_count = 0  # ??
+    test_count = 0
+    total_steps = 0  # total train steps
+    total_test = 0
+    steps_offset = 0  # offset from 1000: do test every 1000 steps
 
+    # hook
     q_hook = PlotHook('Average Q Value', plot_index=4, ylabel='Average Action Value (Q)')
-    loss_hook = PlotHook('Average Loss', plot_index=3, ylabel='Average Loss per Episode')
     steps_hook = PlotHook('Steps to success', plot_index=5, ylabel='Steps to success per Episode')
     test_steps_hook = PlotHook('Steps to success(test)', plot_index=6, ylabel='Steps to success per Episode(test)')
-    step_hooks = [q_hook, steps_hook]
+    loss_hook = PlotHook('Average Loss', plot_index=7, ylabel='Average Loss per Episode')
 
-    total_steps = 0
-    total_test = 0  # total test number: to render the "steps to success in test
-    steps_offset = 0
     # Training...
     for episode in range(EPISODE):
         # initialize task
@@ -212,47 +222,43 @@ def main():
             steps_offset += 1
             # e-greedy action for train
             action = agent.egreedy_action(state)
-            agent.update_average_q()
-            agent.update_steps_to_success(step)
             next_state, reward, done, _ = env.step(action)
             agent.perceive(state, action, reward, next_state, done)
             state = next_state
 
             # hook
             q_hook(env, agent, total_steps)
+            loss_hook(env, agent, total_steps)
 
             if done:
-                print("episode: %d  total_steps: %d" % (episode, total_steps))
+                agent.update_steps_to_success(step)
                 steps_hook(env, agent, episode)
                 break
 
-        if total_steps > EPISODE:
+        if total_steps > MAX_STEPS:
             break
 
         # 每1000次测试一下
         if steps_offset > 1000:
-            steps_offset -= 1000
-            print("start test")
             # Testing...
             # ENV_TEST_NAME与ENV_NAME其实是一个env，区别在于读取samples的方法
             # 训练的时候是从1846-200=1646个样本中随机选取；测试的时候是从200个样本逐个读取
             test_count += 1
+            steps_offset -= 1000
             total_reward = 0
-            test_step = 0
             for i in range(TEST_SAMPLE_COUNT):
-
-                done = False
-                while not done:
-                    # env.render()
-                    test_step += 1
-                    action = agent.action(state)  # direct action for test
-                    state, reward, done, _ = env_test.step(action)
+                test_state = env_test.reset()
+                total_test += 1
+                for step in range(STEP):
+                    action = agent.action(test_state)  # direct action for test
+                    test_state, reward, done, _ = env_test.step(action)
                     # 规避成功reward是10，其他情况都是0，所以最后除以10可以统计，200个样本中规避成功了多少个文件
                     total_reward += reward
-                total_test += 1
-                agent.update_test_steps_to_success(test_step)
-                test_steps_hook(env, agent, total_test)
-                test_step = 0
+                    if done:
+                        agent.update_test_steps_to_success(step)
+                        test_steps_hook(env, agent, total_test)
+                        break
+            test_count += 1
             ave_reward = total_reward / (TEST_SAMPLE_COUNT * 10)
 
             with open('NIS13DQN.txt', 'a+') as f:
