@@ -6,6 +6,7 @@ import argparse
 import linecache
 import os
 import sys
+from math import isnan
 
 import chainer
 import chainer.functions as F
@@ -39,7 +40,9 @@ ACTION_LOOKUP = {i: act for i, act in enumerate(manipulate.ACTION_TABLE.keys())}
 net_layers = [256, 64]
 
 LOSS_DECAY = 0.9
-average_loss = 0
+
+step_average_loss = 0
+episode_average_loss = 0
 
 # 用于快速调用chainerrl的训练方法，参数如下：
 # 1、命令行启动visdom
@@ -50,7 +53,9 @@ average_loss = 0
 
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M")
 
-loss_hook = PlotHook('Average Loss', plot_index=1, ylabel='Average Loss per Episode')
+step_loss_hook = PlotHook('Step Average Loss ', plot_index=0, xlabel='Training Steps', ylabel='Step Average Loss')
+episode_loss_hook = PlotHook('Episode Average Loss ', plot_index=1, xlabel='Training Episodes',
+                             ylabel='Episode Average Loss')
 
 
 def main():
@@ -97,18 +102,28 @@ def main():
 
         return model
 
-    class Loss_hook(TrainEpisodeLogger):
-
+    class Episode_Loss_hook(TrainEpisodeLogger):
         def on_episode_end(self, episode, logs):
             metrics = np.array(self.metrics[episode])
             loss = np.nanmean(metrics[:, 0])
-            global  average_loss
-            print('average loss is %s, loss is %s'%(average_loss,loss))
-            average_loss *= LOSS_DECAY
-            average_loss += (1 - LOSS_DECAY) * loss
-            # metrics = np.nanmean(metrics[:, 0])
-            loss_hook(self.env, self.model, episode, average_loss)
-            print('episode %s   metrics is %s' % (episode, average_loss))
+            global episode_average_loss
+            episode_average_loss *= LOSS_DECAY
+            episode_average_loss += (1 - LOSS_DECAY) * loss
+            episode_loss_hook(self.env, self.model, episode, episode_average_loss)
+
+    class Step_Loss_hook(Callback):
+        def on_step_end(self, step, logs={}):
+            metrics = logs.get('metrics')
+            loss = metrics[0]
+            # print('step_average_loss is %s' % step_average_loss)
+            global step_average_loss
+            if isnan(loss):
+                loss = 0
+            print('step_average_loss is %s' % step_average_loss)
+            step_average_loss *= LOSS_DECAY
+            step_average_loss += (1 - LOSS_DECAY) * loss
+            print('step: %s, loss: %s, average_loss: %s' % (self.model.step, loss, step_average_loss))
+            step_loss_hook(self.env, self.model, self.model.step, step_average_loss)
 
     def train_keras_dqn_model(args):
         ENV_NAME = 'malware-v0'
@@ -139,7 +154,7 @@ def main():
         agent.compile(RMSprop(lr=1e-2), metrics=['mae'])
 
         # play the game. learn something!
-        callbacks = [Loss_hook()]
+        callbacks = [Episode_Loss_hook(), Step_Loss_hook()]
         agent.fit(env, nb_steps=args.steps, callbacks=callbacks, visualize=False, verbose=2)
 
         # model.save('models/{}.h5'.format(timestamp), overwrite=True)
