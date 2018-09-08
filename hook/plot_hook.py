@@ -80,11 +80,11 @@ class PlotHook(StepHook):
         #         # d = {stat[self.plot_index][0]: stat[self.plot_index][1]}
         #         d = {'Average Loss': value}
         #         self.plot(step, d)
-        if self.plot_index == 0:
+        if self.plot_index == 0 or self.plot_index == 2:
             if step % 10 == 0:
                 d = {self.opts.get('ylabel'): value}
                 self.plot(step, d)
-        elif self.plot_index == 1:
+        elif self.plot_index == 1 or self.plot_index == 3:
             d = {self.opts.get('ylabel'): value}
             self.plot(step, d)
         else:
