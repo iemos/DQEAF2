@@ -192,7 +192,7 @@ def main():
         callbacks = [Episode_hook(), Step_hook()]
         agent.fit(env, nb_steps=args.steps, callbacks=callbacks, visualize=False, verbose=2)
 
-        # model.save('models/{}.h5'.format(timestamp), overwrite=True)
+        model.save('models/{}.h5'.format(timestamp), overwrite=True)
 
         history_test = None
 
@@ -203,7 +203,7 @@ def main():
 
             # evaluate the graduation_agent on a few episodes, drawing randomly from the test samples2
             callbacks = [Test_Episode_hook()]
-            agent.test(test_env, nb_episodes=20, callbacks=callbacks, visualize=False)
+            agent.test(test_env, nb_episodes=100, callbacks=callbacks, visualize=False)
             history_test = test_env.history
 
         return env, agent, history_test
@@ -249,7 +249,7 @@ def main():
                     count += 1
                     if v['evaded']:
                         success_count += 1
-                        f.write("{}:{}->{}\n".format(count, k, v['evaded_sha256']))
+                        f.write("{}:{}->evaded success!\n".format(count, k))
                     else:
                         f.write("{}:{}->\n".format(count, k))
 
