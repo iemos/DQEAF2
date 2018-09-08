@@ -103,6 +103,7 @@ def main():
             metrics = np.array(self.metrics[episode])
             loss = np.nanmean(metrics[:, 0])
             global  average_loss
+            print('average loss is %s, loss is %s'%(average_loss,loss))
             average_loss *= LOSS_DECAY
             average_loss += (1 - LOSS_DECAY) * loss
             # metrics = np.nanmean(metrics[:, 0])

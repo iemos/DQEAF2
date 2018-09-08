@@ -54,7 +54,7 @@ class PlotHook(StepHook):
         else:
             self.vis.line(Y=Y, X=X, win=self.win, update='append', opts=self.opts)
 
-    def __call__(self, env, agent, step, value =0):
+    def __call__(self, env, agent, step, value):
         if self.plot_index == 2:
             self.episode_step += 1
             if env.current_reward == 10:
