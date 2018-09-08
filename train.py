@@ -77,7 +77,7 @@ def main():
     parser.add_argument('--start-epsilon', type=float, default=1.0)
     parser.add_argument('--end-epsilon', type=float, default=0.1)
     parser.add_argument('--load', type=str, default=None)
-    parser.add_argument('--steps', type=int, default=1000)
+    parser.add_argument('--steps', type=int, default=5000)
     parser.add_argument('--prioritized-replay', action='store_false')
     parser.add_argument('--episodic-replay', action='store_true')
     parser.add_argument('--replay-start-size', type=int, default=1000)
@@ -239,22 +239,20 @@ def main():
             env, agent, history_test = train_keras_dqn_model(args)
 
             with open(os.path.join(args.outdir, '{}.txt'.format(timestamp)), 'a+') as f:
-                f.write(
-                    "total_turn/episode->{}({}/{})\n".format(env.total_turn / env.episode, env.total_turn, env.episode))
-                f.write("history:\n")
-
                 count = 0
                 success_count = 0
                 for k, v in history_test.items():
                     count += 1
                     if v['evaded']:
                         success_count += 1
-                        f.write("{}:{}->evaded success!\n".format(count, k))
+                        f.write("{}:{}->{} actions to success!\n".format(count, k, len(v['actions'])))
                     else:
                         f.write("{}:{}->\n".format(count, k))
 
-                f.write("success count:{}".format(success_count))
-                f.write("{}".format(history_test))
+                f.write("SR: {}({}/{})\n".format(success_count/count, success_count, count))
+                # f.write("{}".format(history_test))
+                f.write(
+                    "total_turn/episode: {}({}/{})\n".format(env.total_turn / env.episode, env.total_turn, env.episode))
 
             # 重置outdir到models
             args.outdir = 'models'
