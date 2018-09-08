@@ -84,7 +84,7 @@ class PlotHook(StepHook):
             if step % 10 == 0:
                 d = {self.opts.get('ylabel'): value}
                 self.plot(step, d)
-        elif self.plot_index == 1 or self.plot_index == 3:
+        elif self.plot_index == 1 or self.plot_index == 3 or self.plot_index == 4:
             d = {self.opts.get('ylabel'): value}
             self.plot(step, d)
         else:

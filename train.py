@@ -77,7 +77,7 @@ def main():
     parser.add_argument('--start-epsilon', type=float, default=1.0)
     parser.add_argument('--end-epsilon', type=float, default=0.1)
     parser.add_argument('--load', type=str, default=None)
-    parser.add_argument('--steps', type=int, default=1000)
+    parser.add_argument('--steps', type=int, default=20)
     parser.add_argument('--prioritized-replay', action='store_false')
     parser.add_argument('--episodic-replay', action='store_true')
     parser.add_argument('--replay-start-size', type=int, default=1000)
@@ -157,7 +157,7 @@ def main():
     class Test_Episode_hook(TestLogger):
         def on_episode_end(self, episode, logs):
             step = logs.get('nb_steps')
-            Test_Episode_hook(self.env, self.model, episode, step)
+            test_step_to_success_hook(self.env, self.model, episode, step)
 
     def train_keras_dqn_model(args):
         ENV_NAME = 'malware-v0'
