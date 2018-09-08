@@ -54,7 +54,7 @@ class PlotHook(StepHook):
         else:
             self.vis.line(Y=Y, X=X, win=self.win, update='append', opts=self.opts)
 
-    def __call__(self, env, agent, step):
+    def __call__(self, env, agent, step, value =0):
         if self.plot_index == 2:
             self.episode_step += 1
             if env.current_reward == 10:
@@ -75,7 +75,8 @@ class PlotHook(StepHook):
             d = {stat[self.plot_index][0]: stat[self.plot_index][1]}
             self.plot(step, d)
         else:
-            if step % 10 == 0:
-                stat = agent.get_statistics()
-                d = {stat[self.plot_index][0]: stat[self.plot_index][1]}
+            if step % 1 == 0:
+                # stat = agent.get_statistics()
+                # d = {stat[self.plot_index][0]: stat[self.plot_index][1]}
+                d = {'Average Loss': value}
                 self.plot(step, d)

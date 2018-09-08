@@ -30,12 +30,15 @@ from keras.optimizers import RMSprop
 from rl.agents.dqn import DQNAgent
 from rl.policy import BoltzmannQPolicy, EpsGreedyQPolicy
 from rl.memory import SequentialMemory
+from rl.callbacks import Callback,TrainEpisodeLogger
 
 from collections import defaultdict
 
 ACTION_LOOKUP = {i: act for i, act in enumerate(manipulate.ACTION_TABLE.keys())}
 
 net_layers = [256, 64]
+
+LOSS_DECAY = 0.9
 
 # 用于快速调用chainerrl的训练方法，参数如下：
 # 1、命令行启动visdom
@@ -45,6 +48,8 @@ net_layers = [256, 64]
 # python train.py
 
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M")
+
+loss_hook = PlotHook('Average Loss', plot_index=1, ylabel='Average Loss per Episode')
 
 def main():
     parser = argparse.ArgumentParser()
@@ -90,6 +95,18 @@ def main():
 
         return model
 
+    class Loss_hook(TrainEpisodeLogger):
+        def __init__(self):
+            self.average_loss =0
+
+        def on_episode_end(self, episode, logs):
+            metrics = np.array(self.metrics[episode])
+            loss = np.nanmean(metrics[:, 0])
+            self.average_loss *= LOSS_DECAY
+            self.average_loss += (1-LOSS_DECAY)*loss
+            # metrics = np.nanmean(metrics[:, 0])
+            print('episode %s   metrics is %s'%(episode,metrics))
+
     def train_keras_dqn_model(args):
         ENV_NAME = 'malware-v0'
         env = gym.make(ENV_NAME)
@@ -119,9 +136,10 @@ def main():
         agent.compile(RMSprop(lr=1e-2), metrics=['mae'])
 
         # play the game. learn something!
-        agent.fit(env, nb_steps=args.steps, visualize=False, verbose=2)
+        callbacks = [Loss_hook()]
+        agent.fit(env, nb_steps=args.steps, callbacks=callbacks, visualize=False, verbose=2)
 
-        model.save('models/{}.h5'.format(timestamp), overwrite=True)
+        # model.save('models/{}.h5'.format(timestamp), overwrite=True)
 
         history_test = None
 
