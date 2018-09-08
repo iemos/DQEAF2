@@ -30,7 +30,7 @@ from keras.optimizers import RMSprop
 from rl.agents.dqn import DQNAgent
 from rl.policy import BoltzmannQPolicy, EpsGreedyQPolicy
 from rl.memory import SequentialMemory
-from rl.callbacks import Callback,TrainEpisodeLogger
+from rl.callbacks import Callback, TrainEpisodeLogger
 
 from collections import defaultdict
 
@@ -39,6 +39,7 @@ ACTION_LOOKUP = {i: act for i, act in enumerate(manipulate.ACTION_TABLE.keys())}
 net_layers = [256, 64]
 
 LOSS_DECAY = 0.9
+average_loss = 0
 
 # 用于快速调用chainerrl的训练方法，参数如下：
 # 1、命令行启动visdom
@@ -50,6 +51,7 @@ LOSS_DECAY = 0.9
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M")
 
 loss_hook = PlotHook('Average Loss', plot_index=1, ylabel='Average Loss per Episode')
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -96,16 +98,15 @@ def main():
         return model
 
     class Loss_hook(TrainEpisodeLogger):
-        def __init__(self):
-            self.average_loss =0
 
         def on_episode_end(self, episode, logs):
             metrics = np.array(self.metrics[episode])
             loss = np.nanmean(metrics[:, 0])
-            self.average_loss *= LOSS_DECAY
-            self.average_loss += (1-LOSS_DECAY)*loss
+            average_loss *= LOSS_DECAY
+            average_loss += (1 - LOSS_DECAY) * loss
             # metrics = np.nanmean(metrics[:, 0])
-            print('episode %s   metrics is %s'%(episode,metrics))
+            loss_hook(self.env, self.model, episode, average_loss)
+            print('episode %s   metrics is %s' % (episode, average_loss))
 
     def train_keras_dqn_model(args):
         ENV_NAME = 'malware-v0'
@@ -253,6 +254,7 @@ def main():
         with open(scores_file, 'a') as f:
             f.write("{}\n".format(random_result))
             f.write("{}\n".format(blackbox_result))
+
 
 if __name__ == '__main__':
     main()
