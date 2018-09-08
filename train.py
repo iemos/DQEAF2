@@ -31,7 +31,7 @@ from keras.optimizers import RMSprop
 from rl.agents.dqn import DQNAgent
 from rl.policy import BoltzmannQPolicy, EpsGreedyQPolicy
 from rl.memory import SequentialMemory
-from rl.callbacks import Callback, TrainEpisodeLogger
+from rl.callbacks import Callback, TrainEpisodeLogger, TestLogger
 
 from collections import defaultdict
 
@@ -154,8 +154,9 @@ def main():
             step_average_q += (1 - Q_DECAY) * q
             step_q_hook(self.env, self.model, self.model.step, step_average_q)
 
-    class Test_Episode_hook(TrainEpisodeLogger):
+    class Test_Episode_hook(TestLogger):
         def on_episode_end(self, episode, logs):
+            print('logs:%s'%logs)
             step = logs.get('nb_steps')
             Test_Episode_hook(self.env, self.model, episode, step)
 
@@ -192,7 +193,7 @@ def main():
         callbacks = [Episode_hook(), Step_hook()]
         agent.fit(env, nb_steps=args.steps, callbacks=callbacks, visualize=False, verbose=2)
 
-        model.save('models/{}.h5'.format(timestamp), overwrite=True)
+        # model.save('models/{}.h5'.format(timestamp), overwrite=True)
 
         history_test = None
 
