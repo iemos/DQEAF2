@@ -113,6 +113,10 @@ def main():
             metrics = np.array(self.metrics[episode])
             loss = np.nanmean(metrics[:, 0])
             q = np.nanmean(metrics[:, 2])
+            if isnan(loss):
+                loss = 0
+            if isnan(q):
+                q = 0
             global episode_average_loss
             global episode_average_q
             episode_average_loss *= LOSS_DECAY
