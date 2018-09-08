@@ -123,6 +123,7 @@ def main():
             episode_average_q += (1 - Q_DECAY) * q
             episode_q_hook(self.env, self.model, episode, episode_average_q)
 
+            print('episode %s, loss %s, q %s'%(episode,episode_average_loss,episode_average_q))
     class Step_hook(Callback):
         def on_step_end(self, step, logs={}):
             metrics = logs.get('metrics')
@@ -176,7 +177,7 @@ def main():
         callbacks = [Episode_hook(), Step_hook()]
         agent.fit(env, nb_steps=args.steps, callbacks=callbacks, visualize=False, verbose=2)
 
-        # model.save('models/{}.h5'.format(timestamp), overwrite=True)
+        model.save('models/{}.h5'.format(timestamp), overwrite=True)
 
         history_test = None
 
