@@ -266,6 +266,7 @@ def main():
             random_success, misclassified = evaluate(random_action)
             total = len(sha256_holdout) - len(misclassified)  # don't count misclassified towards success
 
+        # 此处评估有问题，待修改
         # option 1: Boltzmann sampling from Q-function network output
         softmax = lambda x: np.exp(x) / np.sum(np.exp(x))
         boltzmann_action = lambda x: np.argmax(np.random.multinomial(1, softmax(x).flatten()))
