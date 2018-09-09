@@ -194,6 +194,7 @@ def main():
 
         model.save('models/{}.h5'.format(timestamp), overwrite=True)
 
+        # 用来记录test的测试过程
         history_test = None
 
         if True:
