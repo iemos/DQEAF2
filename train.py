@@ -211,7 +211,7 @@ def main():
         training_start_time = datetime.datetime.now()
         agent.fit(env, nb_steps=args.steps, callbacks=callbacks, visualize=False, verbose=2)
         training_end_time = datetime.datetime.now()
-        with open("trainning time", 'a+') as f:
+        with open("train_time.txt", 'a+') as f:
             f.write("start_time->{}   end_time->{}\n".format(training_start_time,training_end_time))
         model.save('models/{}.h5'.format(timestamp), overwrite=True)
 
