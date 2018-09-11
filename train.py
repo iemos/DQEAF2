@@ -77,7 +77,7 @@ def main():
     parser.add_argument('--start-epsilon', type=float, default=1.0)
     parser.add_argument('--end-epsilon', type=float, default=0.1)
     parser.add_argument('--load', type=str, default=None)
-    parser.add_argument('--steps', type=int, default=30000)
+    parser.add_argument('--steps', type=int, default=5000)
     parser.add_argument('--prioritized-replay', action='store_false')
     parser.add_argument('--episodic-replay', action='store_true')
     parser.add_argument('--replay-start-size', type=int, default=1000)
@@ -208,8 +208,10 @@ def main():
 
         # play the game. learn something!
         callbacks = [Episode_hook(), Step_hook()]
+        training_start_time = datetime.datetime.now()
         agent.fit(env, nb_steps=args.steps, callbacks=callbacks, visualize=False, verbose=2)
-
+        training_end_time = datetime.datetime.now()
+        print("aaaaaaaaaaaaa    start time is %s, end time is %s"%(training_start_time,training_end_time))
         model.save('models/{}.h5'.format(timestamp), overwrite=True)
 
         # 用来记录test的测试过程
