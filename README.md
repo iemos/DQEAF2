@@ -47,5 +47,8 @@ Included as a default model is a [gradient boosted decision trees model] trained
 We had redefined the environment based on the `gym-malware` previous work. ^_^
 
 ## TODO
-1. 熟悉RL相关参数概念功能
-2. lief相关action操作修改
+1. priority 手写
+2. charinerrl与kerasrl训练时间对比
+3. kerasrl训练中加入测试
+4. web查毒引擎接口
+5. reward重新设计
