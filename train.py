@@ -211,7 +211,8 @@ def main():
         training_start_time = datetime.datetime.now()
         agent.fit(env, nb_steps=args.steps, callbacks=callbacks, visualize=False, verbose=2)
         training_end_time = datetime.datetime.now()
-        print("aaaaaaaaaaaaa    start time is %s, end time is %s"%(training_start_time,training_end_time))
+        with open("trainning time", 'a+') as f:
+            f.write("start_time->{}   end_time->{}\n".format(training_start_time,training_end_time))
         model.save('models/{}.h5'.format(timestamp), overwrite=True)
 
         # 用来记录test的测试过程
