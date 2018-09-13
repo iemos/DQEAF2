@@ -114,7 +114,7 @@ def main():
 
     class Evaluator():
         def __init__(self):
-            self.eval_interval=args.eval_interval
+            self.eval_interval = args.eval_interval
             self.self.prev_eval_step = 0
 
         def evaluate_if_necessary(self, steps):
@@ -153,7 +153,7 @@ def main():
 
             # test every 1000 steps
             steps = logs.get('nb_steps')
-            print("current total steps is %s"%steps)
+            print("current total steps is %s" % steps)
             self.evaluator.evaluate_if_necessary(steps)
 
     class Step_hook(Callback):
@@ -237,7 +237,7 @@ def main():
         training_end_time = datetime.datetime.now()
 
         with open("train_time.txt", 'a+') as f:
-            f.write("start_time->{}   end_time->{}   total _time->{}\n".format(training_start_time,training_end_time,training_end_time-training_start_time))
+            f.write("start_time->{}   end_time->{}\n".format(training_start_time, training_end_time))
         model.save('models/{}.h5'.format(timestamp), overwrite=True)
 
         # 用来记录test的测试过程
@@ -296,7 +296,7 @@ def main():
                     else:
                         f.write("{}:{}->\n".format(count, k))
 
-                f.write("SR: {}({}/{})\n".format(success_count/count, success_count, count))
+                f.write("SR: {}({}/{})\n".format(success_count / count, success_count, count))
                 # f.write("{}".format(history_test))
                 f.write(
                     "total_turn/episode: {}({}/{})\n".format(env.total_turn / env.episode, env.total_turn, env.episode))
