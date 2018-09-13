@@ -112,8 +112,26 @@ def main():
 
         return model
 
+    class Evaluator():
+        def __init__(self):
+            self.eval_interval=args.eval_interval
+            self.self.prev_eval_step = 0
+
+        def evaluate_if_necessary(self, steps):
+            pass
+
+        def evaluate(self):
+            test_env = gym.make(TEST_NAME)
+            # evaluate the graduation_agent on a few episodes, drawing randomly from the test samples2
+            callbacks = [Test_Episode_hook()]
+            agent.test(test_env, nb_episodes=100, callbacks=callbacks, visualize=False)
+
     class Episode_hook(TrainEpisodeLogger):
+        def __init__(self):
+            self.evaluator = Evaluator()
+
         def on_episode_end(self, episode, logs):
+            # compute
             metrics = np.array(self.metrics[episode])
             loss = np.nanmean(metrics[:, 0])
             q = np.nanmean(metrics[:, 2])
@@ -131,7 +149,12 @@ def main():
             episode_average_q += (1 - Q_DECAY) * q
             episode_q_hook(self.env, self.model, episode, episode_average_q)
 
-            print('episode %s, loss %s, q %s' % (episode, episode_average_loss, episode_average_q))
+            # print('episode %s, loss %s, q %s' % (episode, episode_average_loss, episode_average_q))
+
+            # test every 1000 steps
+            steps = logs.get('nb_steps')
+            print("current total steps is %s"%steps)
+            self.evaluator.evaluate_if_necessary(steps)
 
     class Step_hook(Callback):
         def on_step_end(self, step, logs={}):
@@ -208,11 +231,13 @@ def main():
 
         # play the game. learn something!
         callbacks = [Episode_hook(), Step_hook()]
+
         training_start_time = datetime.datetime.now()
-        agent.fit(env, nb_steps=args.steps, callbacks=callbacks, visualize=False, verbose=2)
+        agent.fit(env, nb_steps=args.steps, visualize=False, verbose=2)
         training_end_time = datetime.datetime.now()
+
         with open("train_time.txt", 'a+') as f:
-            f.write("start_time->{}   end_time->{}\n".format(training_start_time,training_end_time))
+            f.write("start_time->{}   end_time->{}   total _time->{}\n".format(training_start_time,training_end_time,training_end_time-training_start_time))
         model.save('models/{}.h5'.format(timestamp), overwrite=True)
 
         # 用来记录test的测试过程
