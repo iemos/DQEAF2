@@ -112,20 +112,6 @@ def main():
 
         return model
 
-    class Evaluator():
-        def __init__(self):
-            self.eval_interval = args.eval_interval
-            self.self.prev_eval_step = 0
-
-        def evaluate_if_necessary(self, steps):
-            pass
-
-        def evaluate(self):
-            test_env = gym.make(TEST_NAME)
-            # evaluate the graduation_agent on a few episodes, drawing randomly from the test samples2
-            callbacks = [Test_Episode_hook()]
-            agent.test(test_env, nb_episodes=100, callbacks=callbacks, visualize=False)
-
     class Episode_hook(TrainEpisodeLogger):
         def __init__(self):
             self.evaluator = Evaluator()
@@ -152,9 +138,9 @@ def main():
             # print('episode %s, loss %s, q %s' % (episode, episode_average_loss, episode_average_q))
 
             # test every 1000 steps
-            steps = logs.get('nb_steps')
-            print("current total steps is %s" % steps)
-            self.evaluator.evaluate_if_necessary(steps)
+            # steps = logs.get('nb_steps')
+            # print("current total steps is %s" % steps)
+            # self.evaluator.evaluate_if_necessary(steps)
 
     class Step_hook(Callback):
         def on_step_end(self, step, logs={}):
