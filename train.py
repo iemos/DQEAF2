@@ -113,8 +113,8 @@ def main():
         return model
 
     class Episode_hook(TrainEpisodeLogger):
-        def __init__(self):
-            self.evaluator = Evaluator()
+        # def __init__(self):
+        #     # self.evaluator = Evaluator()
 
         def on_episode_end(self, episode, logs):
             # compute
@@ -216,7 +216,7 @@ def main():
         agent.compile(RMSprop(lr=1e-2), metrics=['mae'])
 
         # play the game. learn something!
-        callbacks = [Episode_hook(), Step_hook()]
+        # callbacks = [Episode_hook(), Step_hook()]
 
         training_start_time = datetime.datetime.now()
         agent.fit(env, nb_steps=args.steps, visualize=False, verbose=2)
