@@ -40,6 +40,8 @@ logger.setLevel(logging.INFO)
 TEST_NAME = 'malware-test-v0'
 env_test = gym.make(TEST_NAME)
 start_time = datetime.datetime.now()
+with open("time.txt", 'a+') as f:
+    f.write("one: start time is %s " % start_time)
 for i in range(100):
     R = 0
     test_state = env_test.reset()
@@ -53,8 +55,8 @@ for i in range(100):
             # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
             break
 end_time = datetime.datetime.now()
-print("total time is %s " % (end_time - start_time))
 with open("time.txt", 'a+') as f:
+    f.write("one: start time is %s " % end_time)
     f.write("one: total time is %s " % (end_time - start_time))
 
 
@@ -62,6 +64,8 @@ TEST_NAME = 'malware-test-v0'
 test_env = locals()
 test_thread = locals()
 start_time = datetime.datetime.now()
+with open("time.txt", 'a+') as f:
+    f.write("multi: start time is %s " % start_time)
 for x in range (10):
     for i in range(10):
         test_env['env' + str(i)] = gym.make(TEST_NAME)
@@ -73,7 +77,8 @@ for x in range (10):
 end_time = datetime.datetime.now()
 print("total time is %s " % (end_time - start_time))
 with open("time.txt", 'a+') as f:
-    f.write("(multi: total time is %s " % (end_time - start_time))
+    f.write("multi: start time is %s " % end_time)
+    f.write("multi: total time is %s " % (end_time - start_time))
 
 
 
