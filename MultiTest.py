@@ -19,7 +19,7 @@ class myThread(threading.Thread):
             f.write("multi: start time is %s\n " % datetime.datetime.now())
         R = 0
         observation = self.env.reset()
-        for step in range(10):
+        for step in range(50):
             action = self.env.action_space.sample()
             observation, reward, done, info = self.env.step(action)
             # logger.info("thread %s: action %s  observation %s" % (self.threadID, action, observation))
