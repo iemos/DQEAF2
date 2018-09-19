@@ -16,7 +16,7 @@ class myThread(threading.Thread):
 
     def run(self):
         with open("time3.txt", 'a+') as f:
-            f.write("multi: start time is %s\n " % datetime.datetime.now())
+            f.write("multi: thread %s   start time is %s\n " % (self.threadID,datetime.datetime.now()))
         R = 0
         observation = self.env.reset()
         for step in range(50):
@@ -30,7 +30,7 @@ class myThread(threading.Thread):
             #     break
         # logger.info("thread %s end" % self.threadID)
         with open("time3.txt", 'a+') as f:
-            f.write("multi: end time is %s\n " % datetime.datetime.now())
+            f.write("multi: thread %s   end time is %s\n " % (self.threadID, datetime.datetime.now()))
 # def test(env, ID):
 #     for i in range(3):
 #         # action = env
