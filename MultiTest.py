@@ -15,6 +15,8 @@ class myThread(threading.Thread):
         self.env = env
 
     def run(self):
+        with open("time3.txt", 'a+') as f:
+            f.write("multi: start time is %s\n " % datetime.datetime.now())
         R = 0
         observation = self.env.reset()
         for step in range(10):
@@ -27,7 +29,8 @@ class myThread(threading.Thread):
             #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
             #     break
         # logger.info("thread %s end" % self.threadID)
-
+        with open("time3.txt", 'a+') as f:
+            f.write("multi: end time is %s\n " % datetime.datetime.now())
 # def test(env, ID):
 #     for i in range(3):
 #         # action = env
@@ -37,48 +40,41 @@ class myThread(threading.Thread):
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-TEST_NAME = 'malware-test-v0'
-env_test = gym.make(TEST_NAME)
-start_time = datetime.datetime.now()
-with open("time.txt", 'a+') as f:
-    f.write("one: start time is %s " % start_time)
-for i in range(50):
-    R = 0
-    test_state = env_test.reset()
-    for step in range(10):
-        action = env_test.action_space.sample()
-        observation, reward, done, info = env_test.step(action)
-        # logger.info("thread %s: action %s  observation %s" % (self.threadID, action, observation))
-        R += reward
-        # if done:
-        #     # logger.info("thread %s: step = %s  reward = %s" % (i, step, R))
-        #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
-        #     break
-end_time = datetime.datetime.now()
-with open("time.txt", 'a+') as f:
-    f.write("one: start time is %s " % end_time)
-    f.write("one: total time is %s " % (end_time - start_time))
-
-
 # TEST_NAME = 'malware-test-v0'
-# test_env = locals()
-# test_thread = locals()
+# env_test = gym.make(TEST_NAME)
 # start_time = datetime.datetime.now()
-# with open("time2.txt", 'a+') as f:
-#     f.write("multi: start time is %s " % start_time)
-# for x in range (1):
-#     for i in range(50):
-#         test_env['env' + str(i)] = gym.make(TEST_NAME)
-#         test_thread['thread' + str(i)] = myThread(test_env.get('env' + str(i)), i)
-#         test_thread.get('thread' + str(i)).start()
-#     for i in range(50):
-#         test_thread.get('thread' + str(i)).join()
-#     # logger.info("%s  ends"%x)
+# with open("time.txt", 'a+') as f:
+#     f.write("one: start time is %s " % start_time)
+# for i in range(50):
+#     R = 0
+#     test_state = env_test.reset()
+#     for step in range(10):
+#         action = env_test.action_space.sample()
+#         observation, reward, done, info = env_test.step(action)
+#         # logger.info("thread %s: action %s  observation %s" % (self.threadID, action, observation))
+#         R += reward
+#         # if done:
+#         #     # logger.info("thread %s: step = %s  reward = %s" % (i, step, R))
+#         #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
+#         #     break
 # end_time = datetime.datetime.now()
-# print("total time is %s " % (end_time - start_time))
-# with open("time2.txt", 'a+') as f:
-#     f.write("multi: start time is %s " % end_time)
-#     f.write("multi: total time is %s " % (end_time - start_time))
+# with open("time.txt", 'a+') as f:
+#     f.write("one: start time is %s " % end_time)
+#     f.write("one: total time is %s " % (end_time - start_time))
+
+
+TEST_NAME = 'malware-test-v0'
+test_env = locals()
+test_thread = locals()
+start_time = datetime.datetime.now()
+for x in range (1):
+    for i in range(50):
+        test_env['env' + str(i)] = gym.make(TEST_NAME)
+        test_thread['thread' + str(i)] = myThread(test_env.get('env' + str(i)), i)
+        test_thread.get('thread' + str(i)).start()
+    # logger.info("%s  ends"%x)
+end_time = datetime.datetime.now()
+
 
 
 
