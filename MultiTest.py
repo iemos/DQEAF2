@@ -7,84 +7,43 @@ from gym_malware import sha256_holdout, MAXTURNS
 from gym_malware.envs.controls import manipulate2 as manipulate
 from gym_malware.envs.utils import pefeatures, interface
 
+TEST_NAME = 'malware-test-v0'
+test_thread = locals()
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 
 class myThread(threading.Thread):
-    def __init__(self, env, threadID):
+    def __init__(self, threadID):
         threading.Thread.__init__(self)
         self.threadID = threadID
-        self.env = env
+        self.env = gym.make(TEST_NAME)
 
     def run(self):
-        with open("time3.txt", 'a+') as f:
-            f.write("multi: thread %s   start time is %s\n " % (self.threadID,datetime.datetime.now()))
         R = 0
-        observation = self.env.reset()
-        for step in range(50):
+        _ = self.env.reset()
+        for step in range(60):
             action = self.env.action_space.sample()
             observation, reward, done, info = self.env.step(action)
-            # logger.info("thread %s: action %s  observation %s" % (self.threadID, action, observation))
             R += reward
             # if done:
             #     # logger.info("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
             #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
             #     break
-        # logger.info("thread %s end" % self.threadID)
-        with open("time3.txt", 'a+') as f:
-            f.write("multi: thread %s   end time is %s\n " % (self.threadID, datetime.datetime.now()))
-# def test(env, ID):
-#     for i in range(3):
-#         # action = env
-#         observation, reward, done, info = env.step(action)
 
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+time = datetime.datetime.now()
+logger.info("start: {}".format(time))
+with open("time.txt", 'a+') as f:
+    f.write("多线程测试: start time is %s " % time)
 
-# TEST_NAME = 'malware-test-v0'
-# env_test = gym.make(TEST_NAME)
-# start_time = datetime.datetime.now()
-# with open("time.txt", 'a+') as f:
-#     f.write("one: start time is %s " % start_time)
-# for i in range(50):
-#     R = 0
-#     test_state = env_test.reset()
-#     for step in range(10):
-#         action = env_test.action_space.sample()
-#         observation, reward, done, info = env_test.step(action)
-#         # logger.info("thread %s: action %s  observation %s" % (self.threadID, action, observation))
-#         R += reward
-#         # if done:
-#         #     # logger.info("thread %s: step = %s  reward = %s" % (i, step, R))
-#         #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
-#         #     break
-# end_time = datetime.datetime.now()
-# with open("time.txt", 'a+') as f:
-#     f.write("one: start time is %s " % end_time)
-#     f.write("one: total time is %s " % (end_time - start_time))
+for i in range(100):
+    test_thread['thread' + str(i)] = myThread(i)
+    test_thread.get('thread' + str(i)).start()
+for i in range(100):
+    test_thread.get('thread' + str(i)).join()
 
-
-TEST_NAME = 'malware-test-v0'
-test_env = locals()
-test_thread = locals()
-start_time = datetime.datetime.now()
-for x in range (1):
-    for i in range(50):
-        test_env['env' + str(i)] = gym.make(TEST_NAME)
-        test_thread['thread' + str(i)] = myThread(test_env.get('env' + str(i)), i)
-        test_thread.get('thread' + str(i)).start()
-    # logger.info("%s  ends"%x)
-end_time = datetime.datetime.now()
-
-
-
-
-# # 创建新线程
-# thread1 = myThread(1, "Thread-1", 1)
-# thread2 = myThread(2, "Thread-2", 2)
-#
-# # 开启新线程
-# thread1.start()
-# thread2.start()
-# thread1.join()
-# thread2.join()
-# print("退出主线程")
+time = datetime.datetime.now()
+logger.info("end: {}".format(time))
+with open("time.txt", 'a+') as f:
+    f.write("多线程测试: end time is %s " % time)
