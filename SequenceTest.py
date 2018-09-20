@@ -20,7 +20,7 @@ TEST_NAME = 'malware-test-v0'
 env_test = gym.make(TEST_NAME)
 for i in range(100):
     with open(path, 'a+') as f:
-        f.write("episode {}: start time is {} \n".format(i, time))
+        f.write("episode {}: start time is {} \n".format(i, datetime.datetime.now()))
     R = 0
     test_state = env_test.reset()
     for step in range(60):
@@ -32,7 +32,7 @@ for i in range(100):
         #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
         #     break
     with open(path, 'a+') as f:
-        f.write("episode {}: end time is {} \n".format(i, time))
+        f.write("episode {}: end time is {} \n".format(i, datetime.datetime.now()))
 
 time = datetime.datetime.now()
 logger.info("end: {}".format(time))
