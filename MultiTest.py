@@ -18,8 +18,11 @@ class myThread(threading.Thread):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.env = gym.make(TEST_NAME)
+        self.start()
 
     def run(self):
+        with open("time.txt", 'a+') as f:
+            f.write("线程 {}: start time is {} ".format(self.threadID,datetime.datetime.now()))
         R = 0
         _ = self.env.reset()
         for step in range(60):
@@ -30,7 +33,8 @@ class myThread(threading.Thread):
             #     # logger.info("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
             #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
             #     break
-
+        with open("time.txt", 'a+') as f:
+            f.write("线程 {}: end time is {} ".format(self.threadID,datetime.datetime.now()))
 
 time = datetime.datetime.now()
 logger.info("start: {}".format(time))
@@ -39,7 +43,6 @@ with open("time.txt", 'a+') as f:
 
 for i in range(100):
     test_thread['thread' + str(i)] = myThread(i)
-    test_thread.get('thread' + str(i)).start()
 for i in range(100):
     test_thread.get('thread' + str(i)).join()
 
