@@ -12,6 +12,7 @@ test_thread = locals()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+path = "time2.txt"
 
 class myThread(threading.Thread):
     def __init__(self, threadID):
@@ -21,8 +22,8 @@ class myThread(threading.Thread):
         self.start()
 
     def run(self):
-        with open("time.txt", 'a+') as f:
-            f.write("线程 {}: start time is {} ".format(self.threadID,datetime.datetime.now()))
+        with open(path, 'a+') as f:
+            f.write("线程 {}: start time is {} \n".format(self.threadID,datetime.datetime.now()))
         R = 0
         _ = self.env.reset()
         for step in range(60):
@@ -33,13 +34,13 @@ class myThread(threading.Thread):
             #     # logger.info("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
             #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
             #     break
-        with open("time.txt", 'a+') as f:
-            f.write("线程 {}: end time is {} ".format(self.threadID,datetime.datetime.now()))
+        with open(path, 'a+') as f:
+            f.write("线程 {}: end time is {} \n".format(self.threadID,datetime.datetime.now()))
 
 time = datetime.datetime.now()
 logger.info("start: {}".format(time))
-with open("time.txt", 'a+') as f:
-    f.write("多线程测试: start time is %s " % time)
+with open(path, 'a+') as f:
+    f.write("多线程测试: start time is {} \n".format(time))
 
 for i in range(100):
     test_thread['thread' + str(i)] = myThread(i)
@@ -48,5 +49,5 @@ for i in range(100):
 
 time = datetime.datetime.now()
 logger.info("end: {}".format(time))
-with open("time.txt", 'a+') as f:
-    f.write("多线程测试: end time is %s " % time)
+with open(path, 'a+') as f:
+    f.write("多线程测试: end time is {} \n".format(time))
