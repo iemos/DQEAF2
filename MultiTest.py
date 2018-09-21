@@ -34,10 +34,10 @@ def test(id):
         #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
         #     break
     end = datetime.datetime.now()
-    time = end - start
-    logger.info("Process {} runs {}.\n".format(id, time))
+    process_time = end - start
+    logger.info("Process {} runs {}.\n".format(id, process_time))
     with open(path, 'a+') as f:
-        f.write("Process {} runs {}.\n".format(id, time))
+        f.write("Process {} runs {}.\n".format(id, process_time))
 
 
 if __name__ == '__main__':
