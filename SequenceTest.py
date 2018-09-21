@@ -25,6 +25,7 @@ for i in range(100):
     test_state = env_test.reset()
     for step in range(60):
         action = env_test.action_space.sample()
+        logger.info(action)
         observation, reward, done, info = env_test.step(action)
         R += reward
         # if done:
