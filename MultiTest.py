@@ -34,9 +34,11 @@ def test(id):
         #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
         #     break
     end = datetime.datetime.now()
-    logger.info("Process {} runs {:.2f} seconds.\n".format(id, (end - start)))
+    time = end - start
+    logger.info("Process {} runs {:.2f} seconds.\n".format(id, time))
     with open(path, 'a+') as f:
-        f.write("Process {} runs {:.2f} seconds.\n".format(id, (end - start)))
+        f.write("Process {} runs {:.2f} seconds.\n".format(id, time))
+
 
 if __name__ == '__main__':
     print('Parent process %s.' % os.getpid())
@@ -55,7 +57,6 @@ if __name__ == '__main__':
     with open(path, 'a+') as f:
         f.write("多线程测试: end time is {} \n".format(time))
 
-
     # print('Parent process %s.' % os.getpid())
     # p = Pool()
     # for i in range(4):
@@ -72,7 +73,6 @@ if __name__ == '__main__':
     # p1.join()
     # p2.join()
     # print('Process end.')
-
 
 # class myThread(threading.Thread):
 #     def __init__(self, threadID):
