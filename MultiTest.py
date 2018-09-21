@@ -35,9 +35,9 @@ def test(id):
         #     break
     end = datetime.datetime.now()
     time = end - start
-    logger.info("Process {} runs {:.2f} seconds.\n".format(id, time))
+    logger.info("Process {} runs {}.\n".format(id, time))
     with open(path, 'a+') as f:
-        f.write("Process {} runs {:.2f} seconds.\n".format(id, time))
+        f.write("Process {} runs {}.\n".format(id, time))
 
 
 if __name__ == '__main__':
