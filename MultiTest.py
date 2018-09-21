@@ -39,12 +39,20 @@ def test(id):
 
 if __name__ == '__main__':
     print('Parent process %s.' % os.getpid())
+    time = datetime.datetime.now()
+    with open(path, 'a+') as f:
+        f.write("多线程测试: start time is {} \n".format(time))
+
     for i in range(100):
         test_process['Process' + str(i)] = Process(target=test, args=(i,))
         test_process.get('Process' + str(i)).start()
     for i in range(100):
         test_process.get('Process' + str(i)).join()
+        
     print('Process end.')
+    time = datetime.datetime.now()
+    with open(path, 'a+') as f:
+        f.write("多线程测试: end time is {} \n".format(time))
 
 
     # print('Parent process %s.' % os.getpid())
