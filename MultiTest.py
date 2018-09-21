@@ -20,20 +20,21 @@ path = "time2.txt"
 def test(id):
     with open(path, 'a+') as f:
         f.write("run process {} ....\n".format(id))
-    start = time.time()
+    logger.info("run process {} ....\n".format(id))
+    start = datetime.datetime.now()
     env = gym.make(TEST_NAME)
     _ = env.reset()
     R = 0
     for step in range(60):
         action = env.action_space.sample()
-        logger.info(action)
         observation, reward, done, info = env.step(action)
         R += reward
         # if done:
         #     # logger.info("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
         #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
         #     break
-    end = time.time()
+    end = datetime.datetime.now()
+    logger.info("Process {} runs {:.2f} seconds.\n".format(id, (end - start)))
     with open(path, 'a+') as f:
         f.write("Process {} runs {:.2f} seconds.\n".format(id, (end - start)))
 
@@ -48,7 +49,7 @@ if __name__ == '__main__':
         test_process.get('Process' + str(i)).start()
     for i in range(100):
         test_process.get('Process' + str(i)).join()
-        
+
     print('Process end.')
     time = datetime.datetime.now()
     with open(path, 'a+') as f:
