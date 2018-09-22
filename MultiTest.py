@@ -46,10 +46,10 @@ if __name__ == '__main__':
     with open(path, 'a+') as f:
         f.write("多线程测试: start time is {} \n".format(time))
 
-    for i in range(100):
+    for i in range(5):
         test_process['Process' + str(i)] = Process(target=test, args=(i,))
         test_process.get('Process' + str(i)).start()
-    for i in range(100):
+    for i in range(5):
         test_process.get('Process' + str(i)).join()
 
     print('Process end.')
@@ -74,40 +74,3 @@ if __name__ == '__main__':
     # p2.join()
     # print('Process end.')
 
-# class myThread(threading.Thread):
-#     def __init__(self, threadID):
-#         threading.Thread.__init__(self)
-#         self.threadID = threadID
-#         self.env = gym.make(TEST_NAME)
-#         self.start()
-#
-#     def run(self):
-#         with open(path, 'a+') as f:
-#             f.write("线程 {}: start time is {} \n".format(self.threadID,datetime.datetime.now()))
-#         R = 0
-#         _ = self.env.reset()
-#         for step in range(60):
-#             action = self.env.action_space.sample()
-#             observation, reward, done, info = self.env.step(action)
-#             R += reward
-#             # if done:
-#             #     # logger.info("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
-#             #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
-#             #     break
-#         with open(path, 'a+') as f:
-#             f.write("线程 {}: end time is {} \n".format(self.threadID,datetime.datetime.now()))
-#
-# time = datetime.datetime.now()
-# logger.info("start: {}".format(time))
-# with open(path, 'a+') as f:
-#     f.write("多线程测试: start time is {} \n".format(time))
-#
-# for i in range(100):
-#     test_thread['thread' + str(i)] = myThread(i)
-# for i in range(100):
-#     test_thread.get('thread' + str(i)).join()
-#
-# time = datetime.datetime.now()
-# logger.info("end: {}".format(time))
-# with open(path, 'a+') as f:
-#     f.write("多线程测试: end time is {} \n".format(time))
