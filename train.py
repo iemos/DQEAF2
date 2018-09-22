@@ -14,25 +14,22 @@ import numpy as np
 from chainer import optimizers
 from chainerrl import experiments, explorers, replay_buffer, misc
 
-from no_use.bin.test_agent_chainer import evaluate
+from my_rl import train_agent
+# from no_use.bin.test_agent_chainer import evaluate
 from gym_malware import sha256_holdout
 from gym_malware.envs.controls import manipulate2 as manipulate
 from gym_malware.envs.utils import pefeatures
 from hook.plot_hook import PlotHook
 from hook.training_scores_hook import TrainingScoresHook
 
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Flatten, ELU, Dropout, BatchNormalization
-from keras.optimizers import RMSprop
-
 # pip install keras-rl
-from rl.agents.dqn import DQNAgent
-from rl.policy import BoltzmannQPolicy, EpsGreedyQPolicy
-from rl.memory import SequentialMemory
 
 ACTION_LOOKUP = {i: act for i, act in enumerate(manipulate.ACTION_TABLE.keys())}
 
 net_layers = [256, 64]
+
+log_path = "log.txt"
+
 
 # 用于快速调用chainerrl的训练方法，参数如下：
 # 1、命令行启动visdom
@@ -186,7 +183,8 @@ def main():
 
         q_hook = PlotHook('Average Q Value', ylabel='Average Action Value (Q)')
         loss_hook = PlotHook('Average Loss', plot_index=1, ylabel='Average Loss per Episode')
-        reward_hook = PlotHook('Average Reward', plot_index=2, ylabel='Reward Value per Episode')
+        # reward_hook = PlotHook('Average Reward', plot_index=2, ylabel='Reward Value per Episode')
+        train_steps_hook = PlotHook('Steps to done (train)', plot_index=3, ylabel='Steps to done (train)')
         scores_hook = TrainingScoresHook('scores.txt', args.outdir)
 
         chainerrl.experiments.train_agent_with_evaluation(
@@ -196,10 +194,22 @@ def main():
             eval_interval=args.eval_interval,  # Evaluate the graduation_agent after every 1000 steps
             eval_n_runs=args.eval_n_runs,  # 100 episodes are sampled for each evaluation
             outdir=args.outdir,  # Save everything to 'result' directory
-            step_hooks=[q_hook, loss_hook, scores_hook, reward_hook],
+            step_hooks=[q_hook, loss_hook, scores_hook, train_steps_hook],
             successful_score=7,
             eval_env=test_env
         )
+
+        # train_agent.train_agent_with_evaluation(
+        #     agent, env,
+        #     steps=args.steps,  # Train the graduation_agent for this many rounds steps
+        #     max_episode_len=env.maxturns,  # Maximum length of each episodes
+        #     eval_interval=args.eval_interval,  # Evaluate the graduation_agent after every 1000 steps
+        #     eval_n_runs=args.eval_n_runs,  # 100 episodes are sampled for each evaluation
+        #     outdir=args.outdir,  # Save everything to 'result' directory
+        #     step_hooks=[q_hook, loss_hook, scores_hook],
+        #     successful_score=7,
+        #     eval_env=test_env
+        # )
 
         # 保证训练一轮就成功的情况下能成功打印scores.txt文件
         scores_hook(None, None, 1000)
@@ -228,6 +238,8 @@ def main():
             args.outdir = experiments.prepare_output_dir(
                 args, args.outdir, argv=sys.argv)
             print('Output files are saved in {}'.format(args.outdir))
+            with open(log_path, 'a') as f:
+                f.write('Output files are saved in {}\n'.format(args.outdir))
 
             env, agent = train_agent(args)
 
@@ -302,6 +314,7 @@ def main():
         blackbox_result = "black: {}({}/{})".format(len(success) / total, len(success), total)
         with open(scores_file, 'a') as f:
             f.write("{}->{}\n".format(mm, blackbox_result))
+
 
 if __name__ == '__main__':
     main()

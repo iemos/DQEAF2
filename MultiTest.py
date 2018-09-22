@@ -80,4 +80,4 @@ if __name__ == '__main__':
     time = datetime.datetime.now()
     with open(path, 'a+') as f:
         f.write("多线程测试: end time is {} \n".format(time))
-        f.write("成功个数为: {} / {} \n".format(counter.value,args.number))
+        f.write("成功个数为: {} / {} \n".format(counter.value, args.number))
