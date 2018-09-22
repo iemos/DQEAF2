@@ -15,6 +15,7 @@ from chainer import optimizers
 from chainerrl import experiments, explorers, replay_buffer, misc
 
 # from no_use.bin.test_agent_chainer import evaluate
+from my_rl import train_agent
 from gym_malware import sha256_holdout
 from gym_malware.envs.controls import manipulate2 as manipulate
 from gym_malware.envs.utils import pefeatures
@@ -53,7 +54,7 @@ def main():
     parser.add_argument('--target-update-method', type=str, default='hard')
     parser.add_argument('--soft-update-tau', type=float, default=1e-2)
     parser.add_argument('--update-interval', type=int, default=1)
-    parser.add_argument('--eval-n-runs', type=int, default=80)
+    parser.add_argument('--eval-n-runs', type=int, default=100)
     parser.add_argument('--eval-interval', type=int, default=1000)
     parser.add_argument('--gamma', type=float, default=0.99)
     parser.add_argument('--minibatch-size', type=int, default=None)
@@ -172,7 +173,8 @@ def main():
         env = gym.make(ENV_NAME)
         ENV_TEST_NAME = 'malware-score-test-v0' if use_score else 'malware-test-v0'
         test_env = gym.make(ENV_TEST_NAME)
-
+        print("XXXXXXXXXXXXXXX")
+        print("max turns is {}".format(env.maxturns))
         # np.random.seed(123)
         env.seed(123)
         # Set a random seed used in ChainerRL
@@ -185,29 +187,29 @@ def main():
         reward_hook = PlotHook('Average Reward', plot_index=2, ylabel='Reward Value per Episode')
         scores_hook = TrainingScoresHook('scores.txt', args.outdir)
 
-        chainerrl.experiments.train_agent_with_evaluation(
-            agent, env,
-            steps=args.steps,  # Train the graduation_agent for this many rounds steps
-            max_episode_len=env.maxturns,  # Maximum length of each episodes
-            eval_interval=args.eval_interval,  # Evaluate the graduation_agent after every 1000 steps
-            eval_n_runs=args.eval_n_runs,  # 100 episodes are sampled for each evaluation
-            outdir=args.outdir,  # Save everything to 'result' directory
-            step_hooks=[q_hook, loss_hook, scores_hook, reward_hook],
-            successful_score=7,
-            eval_env=test_env
-        )
-
-        # train_agent.train_agent_with_evaluation(
+        # chainerrl.experiments.train_agent_with_evaluation(
         #     agent, env,
         #     steps=args.steps,  # Train the graduation_agent for this many rounds steps
         #     max_episode_len=env.maxturns,  # Maximum length of each episodes
         #     eval_interval=args.eval_interval,  # Evaluate the graduation_agent after every 1000 steps
         #     eval_n_runs=args.eval_n_runs,  # 100 episodes are sampled for each evaluation
         #     outdir=args.outdir,  # Save everything to 'result' directory
-        #     step_hooks=[q_hook, loss_hook, scores_hook],
+        #     step_hooks=[q_hook, loss_hook, scores_hook, reward_hook],
         #     successful_score=7,
         #     eval_env=test_env
         # )
+
+        train_agent.train_agent_with_evaluation(
+            agent, env,
+            steps=args.steps,  # Train the graduation_agent for this many rounds steps
+            max_episode_len=env.maxturns,  # Maximum length of each episodes
+            eval_interval=args.eval_interval,  # Evaluate the graduation_agent after every 1000 steps
+            eval_n_runs=args.eval_n_runs,  # 100 episodes are sampled for each evaluation
+            outdir=args.outdir,  # Save everything to 'result' directory
+            step_hooks=[q_hook, loss_hook, scores_hook],
+            successful_score=7,
+            eval_env=test_env
+        )
 
         # 保证训练一轮就成功的情况下能成功打印scores.txt文件
         scores_hook(None, None, 1000)
