@@ -22,8 +22,6 @@ from gym_malware.envs.utils import pefeatures
 from hook.plot_hook import PlotHook
 from hook.training_scores_hook import TrainingScoresHook
 
-# pip install keras-rl
-
 ACTION_LOOKUP = {i: act for i, act in enumerate(manipulate.ACTION_TABLE.keys())}
 
 net_layers = [256, 64]
