@@ -182,10 +182,13 @@ def main():
 
         agent = create_ddqn_agent(env, args)
 
-        q_hook = PlotHook('Average Q Value', ylabel='Average Action Value (Q)')
-        loss_hook = PlotHook('Average Loss', plot_index=1, ylabel='Average Loss per Episode')
-        reward_hook = PlotHook('Average Reward', plot_index=2, ylabel='Reward Value per Episode')
-        scores_hook = TrainingScoresHook('scores.txt', args.outdir)
+        step_q_hook = PlotHook('Average Q Value (Step)',plot_index=0, ylabel='Average Q Value (Step)')
+        step_loss_hook = PlotHook('Average Loss (Step)', plot_index=1, ylabel='Average Loss (Step)')
+        episode_q_hook = PlotHook('Average Q Value (Episode)', plot_index=2,ylabel='Average Q Value (Episode)')
+        episode_loss_hook = PlotHook('Average Loss (Episode)', plot_index=3, ylabel='Average Loss (Episode)')
+        episode_finish_hook = PlotHook('Steps to finish (train)', plot_index=4, ylabel='Steps to finish (train)')
+        test_finish_hook = PlotHook('Steps to finish (test)', plot_index=5, ylabel='Steps to finish (test)')
+        test_scores_hook = TrainingScoresHook('scores.txt', args.outdir)
 
         # chainerrl.experiments.train_agent_with_evaluation(
         #     agent, env,
@@ -206,13 +209,15 @@ def main():
             eval_interval=args.eval_interval,  # Evaluate the graduation_agent after every 1000 steps
             eval_n_runs=args.eval_n_runs,  # 100 episodes are sampled for each evaluation
             outdir=args.outdir,  # Save everything to 'result' directory
-            step_hooks=[q_hook, loss_hook, scores_hook],
+            step_hooks=[step_q_hook,step_loss_hook],
+            episode_hooks=[episode_q_hook,episode_loss_hook,episode_finish_hook],
+            test_hooks=[test_scores_hook],
             successful_score=7,
             eval_env=test_env
         )
 
         # 保证训练一轮就成功的情况下能成功打印scores.txt文件
-        scores_hook(None, None, 1000)
+        test_scores_hook(None, None, 1000)
 
         return env, agent
 

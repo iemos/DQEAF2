@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from __future__ import division
 from __future__ import absolute_import
 from future import standard_library
+
 standard_library.install_aliases()
 
 import logging
@@ -24,14 +25,14 @@ def save_agent_replay_buffer(agent, t, outdir, suffix='', logger=None):
 
 def ask_and_save_agent_replay_buffer(agent, t, outdir, suffix=''):
     if hasattr(agent, 'replay_buffer') and \
-            ask_yes_no('Replay buffer has {} transitions. Do you save them to a file?'.format(len(agent.replay_buffer))):  # NOQA
+            ask_yes_no('Replay buffer has {} transitions. Do you save them to a file?'.format(
+                len(agent.replay_buffer))):  # NOQA
         save_agent_replay_buffer(agent, t, outdir, suffix=suffix)
 
 
 def train_agent(agent, env, steps, outdir, max_episode_len=None,
                 step_offset=0, evaluator=None, successful_score=None,
-                step_hooks=[], logger=None):
-
+                step_hooks=[], episode_hooks=[], logger=None):
     logger = logger or logging.getLogger(__name__)
 
     episode_r = 0
@@ -74,6 +75,8 @@ def train_agent(agent, env, steps, outdir, max_episode_len=None,
                         break
                 if t == steps:
                     break
+                for hook in episode_hooks:
+                    hook(env, agent, episode_idx, episode_len)
                 # Start a new episode
                 episode_r = 0
                 episode_idx += 1
@@ -95,7 +98,7 @@ def train_agent_with_evaluation(
         agent, env, steps, eval_n_runs, eval_interval,
         outdir, max_episode_len=None, step_offset=0, eval_explorer=None,
         eval_max_episode_len=None, eval_env=None, successful_score=None,
-        step_hooks=[], logger=None):
+        step_hooks=[], episode_hooks=[], test_hooks=[], logger=None):
     """Train an agent while regularly evaluating it.
 
     Args:
@@ -130,13 +133,14 @@ def train_agent_with_evaluation(
         eval_max_episode_len = max_episode_len
 
     evaluator = my_evaluator.Evaluator(agent=agent,
-                          n_runs=eval_n_runs,
-                          eval_interval=eval_interval, outdir=outdir,
-                          max_episode_len=eval_max_episode_len,
-                          explorer=eval_explorer,
-                          env=eval_env,
-                          step_offset=step_offset,
-                          logger=logger)
+                                       n_runs=eval_n_runs,
+                                       eval_interval=eval_interval, outdir=outdir,
+                                       max_episode_len=eval_max_episode_len,
+                                       explorer=eval_explorer,
+                                       env=eval_env,
+                                       step_offset=step_offset,
+                                       test_hooks=test_hooks,
+                                       logger=logger)
 
     train_agent(
         agent, env, steps, outdir,
@@ -145,4 +149,5 @@ def train_agent_with_evaluation(
         evaluator=evaluator,
         successful_score=successful_score,
         step_hooks=step_hooks,
+        episode_hooks=episode_hooks,
         logger=logger)

@@ -64,8 +64,9 @@ def test(id, agent, scores, max_episode_len=None, explorer=None):
     agent.stop_episode()
     scores[id] = float(test_r)
 
+
 def run_evaluation_episodes(env, agent, n_runs, max_episode_len=None,
-                            explorer=None, logger=None):
+                            explorer=None, logger=None, test_hooks=[]):
     """Run multiple evaluation episodes and return returns.
 
     Args:
@@ -96,7 +97,9 @@ def run_evaluation_episodes(env, agent, n_runs, max_episode_len=None,
 
     with open(path, 'a+') as f:
         f.write("结束测试: end time is {} \n".format(datetime.datetime.now()))
-        f.write("scores is {}\n".format(scores))
+        f.write("scores is {}\n".format(scores[:]))
+    for hook in test_hooks:
+        hook(env, agent)
     return scores
 
     # for i in range(n_runs):
@@ -124,7 +127,7 @@ def run_evaluation_episodes(env, agent, n_runs, max_episode_len=None,
 
 
 def eval_performance(env, agent, n_runs, max_episode_len=None,
-                     explorer=None, logger=None):
+                     explorer=None, logger=None, test_hooks=[]):
     """Run multiple evaluation episodes and return statistics.
 
     Args:
@@ -145,7 +148,7 @@ def eval_performance(env, agent, n_runs, max_episode_len=None,
         env, agent, n_runs,
         max_episode_len=max_episode_len,
         explorer=explorer,
-        logger=logger)
+        logger=logger, test_hooks=test_hooks)
     stats = dict(
         mean=statistics.mean(scores),
         median=statistics.median(scores),
@@ -177,7 +180,7 @@ class Evaluator(object):
 
     def __init__(self, agent, env, n_runs, eval_interval,
                  outdir, max_episode_len=None, explorer=None,
-                 step_offset=0, logger=None):
+                 step_offset=0, test_hooks=[], logger=None):
         self.agent = agent
         self.env = env
         self.max_score = np.finfo(np.float32).min
@@ -191,6 +194,7 @@ class Evaluator(object):
         self.prev_eval_t = (self.step_offset -
                             self.step_offset % self.eval_interval)
         self.logger = logger or logging.getLogger(__name__)
+        self.test_hooks = test_hooks
 
         # Write a header line first
         with open(os.path.join(self.outdir, 'scores.txt'), 'w') as f:
@@ -202,7 +206,7 @@ class Evaluator(object):
         eval_stats = eval_performance(
             self.env, self.agent, self.n_runs,
             max_episode_len=self.max_episode_len, explorer=self.explorer,
-            logger=self.logger)
+            logger=self.logger, test_hooks=self.test_hooks)
         elapsed = time.time() - self.start_time
         custom_values = tuple(tup[1] for tup in self.agent.get_statistics())
         mean = eval_stats['mean']
