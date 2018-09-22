@@ -52,8 +52,17 @@ if __name__ == '__main__':
     for i in range(args.number):
         test_process['Process' + str(i)] = Process(target=test, args=(i,))
         test_process.get('Process' + str(i)).start()
+
+    print('Wait all processed end.')
+    with open(path, 'a+') as f:
+        f.write('Wait all processed end.')
+
     for i in range(args.number):
         test_process.get('Process' + str(i)).join()
+        print('Process {} exit.'.format(i))
+        with open(path, 'a+') as f:
+            f.write('Process {} exit.'.format(i))
+
 
     print('Process end.')
     time = datetime.datetime.now()
