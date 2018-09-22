@@ -46,10 +46,10 @@ if __name__ == '__main__':
     with open(path, 'a+') as f:
         f.write("多线程测试: start time is {} \n".format(time))
 
-    for i in range(5):
+    for i in range(50):
         test_process['Process' + str(i)] = Process(target=test, args=(i,))
         test_process.get('Process' + str(i)).start()
-    for i in range(5):
+    for i in range(50):
         test_process.get('Process' + str(i)).join()
 
     print('Process end.')
