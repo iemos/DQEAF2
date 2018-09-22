@@ -44,8 +44,6 @@ TEST_NAME = 'malware-test-v0'
 
 
 def test(id, agent, scores, max_episode_len=None, explorer=None):
-    start = datetime.datetime.now()
-
     env = gym.make(TEST_NAME)
     obs = env.reset()
     done = False
@@ -65,13 +63,6 @@ def test(id, agent, scores, max_episode_len=None, explorer=None):
         t += 1
     agent.stop_episode()
     scores[id] = float(test_r)
-
-    end = datetime.datetime.now()
-    process_time = end - start
-
-    with open(path, 'a+') as f:
-        f.write("Test {} runs {} with {} steps.\n".format(id, process_time, t))
-
 
 def run_evaluation_episodes(env, agent, n_runs, max_episode_len=None,
                             explorer=None, logger=None):
@@ -100,14 +91,12 @@ def run_evaluation_episodes(env, agent, n_runs, max_episode_len=None,
         test_process['Process' + str(i)] = Process(target=test, args=(i, agent, scores, max_episode_len, explorer))
         test_process.get('Process' + str(i)).start()
 
-    with open(path, 'a+') as f:
-        f.write('Wait all processed end.\n')
-
     for i in range(n_runs):
         test_process.get('Process' + str(i)).join()
-        with open(path, 'a+') as f:
-            f.write('Process {} exit.\n'.format(i))
 
+    with open(path, 'a+') as f:
+        f.write("结束测试: end time is {} \n".format(datetime.datetime.now()))
+        f.write("scores is {}\n".format(scores))
     return scores
 
     # for i in range(n_runs):
