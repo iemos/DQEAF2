@@ -14,7 +14,6 @@ import numpy as np
 from chainer import optimizers
 from chainerrl import experiments, explorers, replay_buffer, misc
 
-# from my_rl import train_agent
 # from no_use.bin.test_agent_chainer import evaluate
 from gym_malware import sha256_holdout
 from gym_malware.envs.controls import manipulate2 as manipulate
@@ -183,8 +182,7 @@ def main():
 
         q_hook = PlotHook('Average Q Value', ylabel='Average Action Value (Q)')
         loss_hook = PlotHook('Average Loss', plot_index=1, ylabel='Average Loss per Episode')
-        # reward_hook = PlotHook('Average Reward', plot_index=2, ylabel='Reward Value per Episode')
-        train_steps_hook = PlotHook('Steps to done (train)', plot_index=3, ylabel='Steps to done (train)')
+        reward_hook = PlotHook('Average Reward', plot_index=2, ylabel='Reward Value per Episode')
         scores_hook = TrainingScoresHook('scores.txt', args.outdir)
 
         chainerrl.experiments.train_agent_with_evaluation(
@@ -194,7 +192,7 @@ def main():
             eval_interval=args.eval_interval,  # Evaluate the graduation_agent after every 1000 steps
             eval_n_runs=args.eval_n_runs,  # 100 episodes are sampled for each evaluation
             outdir=args.outdir,  # Save everything to 'result' directory
-            step_hooks=[q_hook, loss_hook, scores_hook, train_steps_hook],
+            step_hooks=[q_hook, loss_hook, scores_hook, reward_hook],
             successful_score=7,
             eval_env=test_env
         )
@@ -314,7 +312,6 @@ def main():
         blackbox_result = "black: {}({}/{})".format(len(success) / total, len(success), total)
         with open(scores_file, 'a') as f:
             f.write("{}->{}\n".format(mm, blackbox_result))
-
 
 if __name__ == '__main__':
     main()
