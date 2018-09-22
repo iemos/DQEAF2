@@ -44,7 +44,7 @@ if __name__ == '__main__':
     parser.add_argument('--number', type=int, default=10)
     args = parser.parse_args()
 
-    print('Parent process %s.' % os.getpid())
+    print('测试数目：{}.\n' .format(args.number))
     time = datetime.datetime.now()
     with open(path, 'a+') as f:
         f.write("多线程测试: start time is {} \n".format(time))
@@ -53,15 +53,15 @@ if __name__ == '__main__':
         test_process['Process' + str(i)] = Process(target=test, args=(i,))
         test_process.get('Process' + str(i)).start()
 
-    print('Wait all processed end.')
+    print('Wait all processed end.\n')
     with open(path, 'a+') as f:
-        f.write('Wait all processed end.')
+        f.write('Wait all processed end.\n')
 
     for i in range(args.number):
         test_process.get('Process' + str(i)).join()
-        print('Process {} exit.'.format(i))
+        print('Process {} exit.\n'.format(i))
         with open(path, 'a+') as f:
-            f.write('Process {} exit.'.format(i))
+            f.write('Process {} exit.\n'.format(i))
 
 
     print('Process end.')
