@@ -8,6 +8,7 @@ from gym_malware.envs.controls import manipulate2 as manipulate
 from gym_malware.envs.utils import pefeatures, interface
 from multiprocessing import Pool, Process
 import os
+import argparse
 
 TEST_NAME = 'malware-test-v0'
 test_process = locals()
@@ -29,27 +30,29 @@ def test(id):
         action = env.action_space.sample()
         observation, reward, done, info = env.step(action)
         R += reward
-        # if done:
-        #     # logger.info("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
-        #     # print("thread %s: step = %s  reward = %s" % (self.threadID, step, R))
-        #     break
+        if done:
+            break
     end = datetime.datetime.now()
     process_time = end - start
-    logger.info("Process {} runs {}.\n".format(id, process_time))
+    logger.info("Process {} runs {} with {} steps.\n".format(id, process_time, step))
     with open(path, 'a+') as f:
-        f.write("Process {} runs {}.\n".format(id, process_time))
+        f.write("Process {} runs {} with {} steps.\n".format(id, process_time, step))
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--number', type=int, default=10)
+    args = parser.parse_args()
+
     print('Parent process %s.' % os.getpid())
     time = datetime.datetime.now()
     with open(path, 'a+') as f:
         f.write("多线程测试: start time is {} \n".format(time))
 
-    for i in range(30):
+    for i in range(args.number):
         test_process['Process' + str(i)] = Process(target=test, args=(i,))
         test_process.get('Process' + str(i)).start()
-    for i in range(30):
+    for i in range(args.number):
         test_process.get('Process' + str(i)).join()
 
     print('Process end.')
@@ -73,4 +76,3 @@ if __name__ == '__main__':
     # p1.join()
     # p2.join()
     # print('Process end.')
-
