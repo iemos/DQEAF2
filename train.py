@@ -15,7 +15,7 @@ from chainer import optimizers
 from chainerrl import experiments, explorers, replay_buffer, misc
 
 # from no_use.bin.test_agent_chainer import evaluate
-import my_rl
+from my_rl import my_train
 from gym_malware import sha256_holdout
 from gym_malware.envs.controls import manipulate2 as manipulate
 from gym_malware.envs.utils import pefeatures
@@ -199,7 +199,7 @@ def main():
         #     eval_env=test_env
         # )
 
-        my_rl.train_agent.train_agent_with_evaluation(
+        my_train.train_agent_with_evaluation(
             agent, env,
             steps=args.steps,  # Train the graduation_agent for this many rounds steps
             max_episode_len=env.maxturns,  # Maximum length of each episodes

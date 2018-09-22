@@ -9,7 +9,7 @@ import logging
 import os
 
 # from chainerrl.experiments.evaluator import Evaluator
-from my_rl.evaluator import Evaluator
+from my_rl import my_evaluator
 from chainerrl.experiments.evaluator import save_agent
 from chainerrl.misc.ask_yes_no import ask_yes_no
 from chainerrl.misc.makedirs import makedirs
@@ -129,7 +129,7 @@ def train_agent_with_evaluation(
     if eval_max_episode_len is None:
         eval_max_episode_len = max_episode_len
 
-    evaluator = Evaluator(agent=agent,
+    evaluator = my_evaluator.Evaluator(agent=agent,
                           n_runs=eval_n_runs,
                           eval_interval=eval_interval, outdir=outdir,
                           max_episode_len=eval_max_episode_len,
