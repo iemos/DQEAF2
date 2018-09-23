@@ -180,13 +180,20 @@ def main():
 
         agent = create_ddqn_agent(env, args)
 
-        step_q_hook = PlotHook('Average Q Value (Step)',plot_index=0, xlabel='train step', ylabel='Average Q Value (Step)')
-        step_loss_hook = PlotHook('Average Loss (Step)', plot_index=1, xlabel='train step', ylabel='Average Loss (Step)')
-        episode_q_hook = PlotHook('Average Q Value (Episode)', plot_index=2, xlabel='train episode', ylabel='Average Q Value (Episode)')
-        episode_loss_hook = PlotHook('Average Loss (Episode)', plot_index=3, xlabel='train episode', ylabel='Average Loss (Episode)')
-        episode_finish_hook = PlotHook('Steps to finish (train)', plot_index=4, xlabel='test episode', ylabel='Steps to finish (train)')
-        test_finish_hook = PlotHook('Steps to finish (test)', plot_index=5, xlabel='test episode', ylabel='Steps to finish (test)')
-        test_scores_hook = TrainingScoresHook('scores.txt', args.outdir)
+        step_q_hook = PlotHook('Average Q Value (Step)', plot_index=0, xlabel='train step',
+                               ylabel='Average Q Value (Step)')
+        step_loss_hook = PlotHook('Average Loss (Step)', plot_index=1, xlabel='train step',
+                                  ylabel='Average Loss (Step)')
+        episode_q_hook = PlotHook('Average Q Value (Episode)', plot_index=2, xlabel='train episode',
+                                  ylabel='Average Q Value (Episode)')
+        episode_loss_hook = PlotHook('Average Loss (Episode)', plot_index=3, xlabel='train episode',
+                                     ylabel='Average Loss (Episode)')
+        episode_finish_hook = PlotHook('Steps to finish (train)', plot_index=4, xlabel='test episode',
+                                       ylabel='Steps to finish (train)')
+        test_finish_hook = PlotHook('Steps to finish (test)', plot_index=5, xlabel='test episode',
+                                    ylabel='Steps to finish (test)')
+        test_scores_hook = PlotHook('success rate', plot_index=6, xlabel='test epoch', ylabel='success rate')
+        # test_scores_hook = TrainingScoresHook('scores.txt', args.outdir)
 
         # chainerrl.experiments.train_agent_with_evaluation(
         #     agent, env,
@@ -207,9 +214,9 @@ def main():
             eval_interval=args.eval_interval,  # Evaluate the graduation_agent after every 1000 steps
             eval_n_runs=args.eval_n_runs,  # 100 episodes are sampled for each evaluation
             outdir=args.outdir,  # Save everything to 'result' directory
-            step_hooks=[step_q_hook,step_loss_hook],
-            episode_hooks=[episode_q_hook,episode_loss_hook,episode_finish_hook],
-            test_hooks=[test_scores_hook],
+            step_hooks=[step_q_hook, step_loss_hook],
+            episode_hooks=[episode_q_hook, episode_loss_hook, episode_finish_hook],
+            test_hooks=[test_scores_hook, test_finish_hook],
             successful_score=7,
             eval_env=test_env
         )
@@ -317,6 +324,7 @@ def main():
         blackbox_result = "black: {}({}/{})".format(len(success) / total, len(success), total)
         with open(scores_file, 'a') as f:
             f.write("{}->{}\n".format(mm, blackbox_result))
+
 
 if __name__ == '__main__':
     main()

@@ -67,7 +67,12 @@ class PlotHook(StepHook):
         elif self.plot_index == 4:
             d = {'Steps to finish (train)': value}
             self.plot(step, d)
-
+        elif self.plot_index == 5:
+            d = {'Steps to finish (test)': value}
+            self.plot(step, d)
+        elif self.plot_index == 6:
+            d = {'success rate': value}
+            self.plot(step, d)
         else:
             if step % 10 == 0:
                 stat = agent.get_statistics()

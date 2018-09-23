@@ -43,13 +43,12 @@ path = "test_log.txt"
 TEST_NAME = 'malware-test-v0'
 
 
-def test(id, agent, scores, max_episode_len=None, explorer=None):
+def test(id, agent, scores, steps, max_episode_len=None, explorer=None):
     env = gym.make(TEST_NAME)
     obs = env.reset()
     done = False
     test_r = 0
     t = 0
-
     while not (done or t == max_episode_len):
         def greedy_action_func():
             return agent.act(obs)
@@ -63,9 +62,10 @@ def test(id, agent, scores, max_episode_len=None, explorer=None):
         t += 1
     agent.stop_episode()
     scores[id] = float(test_r)
+    steps[id] = t
 
 
-def run_evaluation_episodes(env, agent, n_runs, max_episode_len=None,
+def run_evaluation_episodes(env, agent, n_runs, count, max_episode_len=None,
                             explorer=None, logger=None, test_hooks=[]):
     """Run multiple evaluation episodes and return returns.
 
@@ -85,48 +85,27 @@ def run_evaluation_episodes(env, agent, n_runs, max_episode_len=None,
     """
     # logger = logger or logging.getLogger(__name__)
     scores = mp.Array('f', np.zeros(n_runs))
+    steps = mp.Array('i', np.zeros((n_runs,), dtype=np.int))
     with open(path, 'a+') as f:
-        f.write("开始测试: start time is {} \n".format(datetime.datetime.now()))
+        f.write("开始第{}轮测试: start time is {} \n".format(count, datetime.datetime.now()))
 
     for i in range(n_runs):
-        test_process['Process' + str(i)] = Process(target=test, args=(i, agent, scores, max_episode_len, explorer))
+        test_process['Process' + str(i)] = Process(target=test,
+                                                   args=(i, agent, scores, steps, max_episode_len, explorer))
         test_process.get('Process' + str(i)).start()
 
     for i in range(n_runs):
         test_process.get('Process' + str(i)).join()
+        test_hooks[1](env, agent, count * n_runs + i, steps[i])
 
     with open(path, 'a+') as f:
-        f.write("结束测试: end time is {} \n".format(datetime.datetime.now()))
-        f.write("scores is {}\n".format(scores[:]))
-    for hook in test_hooks:
-        hook(env, agent)
+        f.write("结束第{}轮测试: end time is {} \n".format(count, datetime.datetime.now()))
+        f.write("scores is {}\n".format(statistics.mean(scores)))
+    test_hooks[0](env, agent, count, statistics.mean(scores) / 10)
     return scores
 
-    # for i in range(n_runs):
-    #     obs = env.reset()
-    #     done = False
-    #     test_r = 0
-    #     t = 0
-    #     while not (done or t == max_episode_len):
-    #         def greedy_action_func():
-    #             return agent.act(obs)
-    #
-    #         if explorer is not None:
-    #             a = explorer.select_action(t, greedy_action_func)
-    #         else:
-    #             a = greedy_action_func()
-    #         obs, r, done, info = env.step(a)
-    #         test_r += r
-    #         t += 1
-    #     agent.stop_episode()
-    #     # As mixing float and numpy float causes errors in statistics
-    #     # functions, here every score is cast to float.
-    #     scores.append(float(test_r))
-    #     # logger.info('test episode: %s R: %s', i, test_r)
-    # return scores
 
-
-def eval_performance(env, agent, n_runs, max_episode_len=None,
+def eval_performance(env, agent, n_runs, count, max_episode_len=None,
                      explorer=None, logger=None, test_hooks=[]):
     """Run multiple evaluation episodes and return statistics.
 
@@ -145,7 +124,7 @@ def eval_performance(env, agent, n_runs, max_episode_len=None,
         Dict of statistics.
     """
     scores = run_evaluation_episodes(
-        env, agent, n_runs,
+        env, agent, n_runs, count,
         max_episode_len=max_episode_len,
         explorer=explorer,
         logger=logger, test_hooks=test_hooks)
@@ -196,6 +175,8 @@ class Evaluator(object):
         self.logger = logger or logging.getLogger(__name__)
         self.test_hooks = test_hooks
 
+        self.count = 0
+
         # Write a header line first
         with open(os.path.join(self.outdir, 'scores.txt'), 'w') as f:
             custom_columns = tuple(t[0] for t in self.agent.get_statistics())
@@ -205,8 +186,9 @@ class Evaluator(object):
     def evaluate_and_update_max_score(self, t, episodes):
         eval_stats = eval_performance(
             self.env, self.agent, self.n_runs,
-            max_episode_len=self.max_episode_len, explorer=self.explorer,
+            max_episode_len=self.max_episode_len, count=self.count, explorer=self.explorer,
             logger=self.logger, test_hooks=self.test_hooks)
+        self.count += 1
         elapsed = time.time() - self.start_time
         custom_values = tuple(tup[1] for tup in self.agent.get_statistics())
         mean = eval_stats['mean']
