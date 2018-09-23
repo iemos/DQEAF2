@@ -182,12 +182,12 @@ def main():
 
         agent = create_ddqn_agent(env, args)
 
-        step_q_hook = PlotHook('Average Q Value (Step)',plot_index=0, ylabel='Average Q Value (Step)')
-        step_loss_hook = PlotHook('Average Loss (Step)', plot_index=1, ylabel='Average Loss (Step)')
-        episode_q_hook = PlotHook('Average Q Value (Episode)', plot_index=2,ylabel='Average Q Value (Episode)')
-        episode_loss_hook = PlotHook('Average Loss (Episode)', plot_index=3, ylabel='Average Loss (Episode)')
-        episode_finish_hook = PlotHook('Steps to finish (train)', plot_index=4, ylabel='Steps to finish (train)')
-        test_finish_hook = PlotHook('Steps to finish (test)', plot_index=5, ylabel='Steps to finish (test)')
+        step_q_hook = PlotHook('Average Q Value (Step)',plot_index=0, xlabel='train step', ylabel='Average Q Value (Step)')
+        step_loss_hook = PlotHook('Average Loss (Step)', plot_index=1, xlabel='train step', ylabel='Average Loss (Step)')
+        episode_q_hook = PlotHook('Average Q Value (Episode)', plot_index=2, xlabel='train episode', ylabel='Average Q Value (Episode)')
+        episode_loss_hook = PlotHook('Average Loss (Episode)', plot_index=3, xlabel='train episode', ylabel='Average Loss (Episode)')
+        episode_finish_hook = PlotHook('Steps to finish (train)', plot_index=4, xlabel='test episode', ylabel='Steps to finish (train)')
+        test_finish_hook = PlotHook('Steps to finish (test)', plot_index=5, xlabel='test episode', ylabel='Steps to finish (test)')
         test_scores_hook = TrainingScoresHook('scores.txt', args.outdir)
 
         # chainerrl.experiments.train_agent_with_evaluation(
