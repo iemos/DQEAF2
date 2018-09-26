@@ -4,6 +4,7 @@ import argparse
 import linecache
 import os
 import sys
+from collections import defaultdict
 
 import chainer
 import chainer.functions as F
@@ -14,20 +15,17 @@ import numpy as np
 from chainer import optimizers
 from chainerrl import experiments, explorers, replay_buffer, misc
 
-# from no_use.bin.test_agent_chainer import evaluate
-from my_rl import my_train
-from gym_malware import sha256_holdout
+from gym_malware import sha256_holdout, MAXTURNS
 from gym_malware.envs.controls import manipulate2 as manipulate
-from gym_malware.envs.utils import pefeatures
+from gym_malware.envs.utils import pefeatures, interface
 from hook.plot_hook import PlotHook
-from hook.training_scores_hook import TrainingScoresHook
+from my_rl import my_train
 
 ACTION_LOOKUP = {i: act for i, act in enumerate(manipulate.ACTION_TABLE.keys())}
 
 net_layers = [256, 64]
 
 log_path = "log.txt"
-
 
 # 用于快速调用chainerrl的训练方法，参数如下：
 # 1、命令行启动visdom
@@ -239,6 +237,28 @@ def main():
 
         assert lastmodel >= 0, "No saved models!"
         return os.path.join(basedir, str(lastmodel))
+
+    # 动作评估，测试时使用
+    def evaluate(action_function):
+        success = []
+        misclassified = []
+        for sha256 in sha256_holdout:
+            success_dict = defaultdict(list)
+            bytez = interface.fetch_file(sha256)
+            label = interface.get_label_local(bytez)
+            if label == 0.0:
+                misclassified.append(sha256)
+                continue  # already misclassified, move along
+            for _ in range(MAXTURNS):
+                action = action_function(bytez)
+                print(action)
+                success_dict[sha256].append(action)
+                bytez = manipulate.modify_without_breaking(bytez, [action])
+                new_label = interface.get_label_local(bytez)
+                if new_label == 0.0:
+                    success.append(success_dict)
+                    break
+        return success, misclassified  # evasion accuracy is len(success) / len(sha256_holdout)
 
     if not args.test:
         print("training...")
