@@ -188,7 +188,7 @@ def main():
                                   ylabel='Average Q Value (Episode)')
         episode_loss_hook = PlotHook('Average Loss (Episode)', plot_index=3, xlabel='train episode',
                                      ylabel='Average Loss (Episode)')
-        episode_finish_hook = PlotHook('Steps to finish (train)', plot_index=4, xlabel='test episode',
+        episode_finish_hook = PlotHook('Steps to finish (train)', plot_index=4, xlabel='train episode',
                                        ylabel='Steps to finish (train)')
         test_finish_hook = PlotHook('Steps to finish (test)', plot_index=5, xlabel='test episode',
                                     ylabel='Steps to finish (test)')
