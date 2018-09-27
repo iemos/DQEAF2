@@ -71,7 +71,7 @@ def main():
     #     "sha256": "3b7e88dea3d358744345f9a18cfb06edf858b5a6c72a91e7ddf92202cc244a02",
     #     "permalink": "https://s.threatbook.cn/report/file/3b7e88dea3d358744345f9a18cfb06edf858b5a6c72a91e7ddf92202cc244a02/?sign=history&env=win7_sp1_enx86_office2013"
     # }
-    if result_dict['msg']  != 'OK':
+    if result_dict['msg'] != 'OK':
         print("upload error!")
         return -1
 
@@ -81,12 +81,12 @@ def main():
     print("======summary======")
     summary_dict = tb.get_summary(sha256)
 
-    if summary_dict['msg']  != 'OK':
+    if summary_dict['msg'] != 'OK':
         print("summary error!")
         return -1
 
-    print('threat_level: {}'.format(summary_dict['data']['threat_level']))
-    print('threat_score: {}'.format(summary_dict['data']['threat_score']))
+    print('threat_level: {}'.format(summary_dict['data']['summary']['threat_level']))
+    print('threat_score: {}'.format(summary_dict['data']['summary']['threat_score']))
     # {
     #     "status_code": 0,
     #     "data": {
@@ -117,11 +117,12 @@ def main():
     print("======multi======")
     multi_dict = tb.get_multiengines(sha256)
 
-    if multi_dict['msg']  != 'OK':
+    if multi_dict['msg'] != 'OK':
         print("multi error!")
         return -1
 
-    print('multi_dict length: {}'.format(len(multi_dict['data']['multiengines'])))
+    engines = multi_dict['data']['multiengines']
+    print('ratio: {}/{}'.format(len([key for key in engines if engines[key] == 'safe']), len(engines)))
     # {
     #     "AVG": "safe",
     #     "Antiy": "safe",
@@ -149,3 +150,6 @@ def main():
     #     "Tencent": "Msil.Backdoor.Agent.Lneq",
     #     "vbwebshell": "safe"
     # }
+
+if __name__ == '__main__':
+    main()
