@@ -6,7 +6,7 @@ from gym_malware.envs.utils import interface
 class ThreatBook(object):
     def __init__(self):
         self.api_key = '54a104603aad46c9bc02917b952e273846d8748ddd6247e09f845bfb16d8ed10'
-        self.sandbox_type = 'win7_sp1_enx86_office2013'
+        self.sandbox_type = 'win7_sp1_enx86_office2003'
 
     # 提交文件并分析
     def upload(self, file_name):
@@ -155,29 +155,33 @@ def local_engine():
         label = interface.get_label_local(bytez)
         if label == 0.0:
             benign.append(sha256)
-            interface.delete_file(sha256)
+            # interface.delete_file(sha256)
         else:
             malware.append(sha256)
 
     print('malware:{}, benign:{}'.format(malware.__len__(), benign.__len__()))
-
 
 # 使用远程引擎统计sample里样本组成情况
 def remote_engine(limit=20):
     sha_list = interface.get_available_sha256()
     malware = []
     benign = []
+    crash = []
     for sha256 in sha_list:
+        print(sha256)
         file_path = os.path.join(interface.SAMPLE_PATH, sha256)
 
-        limit -= 1
         if limit < 0:
             break
 
+        limit -= 1
+
         tb = ThreatBook()
         result_dict = tb.upload(file_path)
+
         if result_dict['msg'] != 'OK':
             print("upload error!")
+            crash.append(sha256)
             continue
 
         sha256 = result_dict['sha256']
@@ -187,10 +191,11 @@ def remote_engine(limit=20):
 
         if summary_dict['msg'] != 'OK':
             print(summary_dict)
+            crash.append(sha256)
             continue
 
-        print('threat_level: {}'.format(summary_dict['data']['summary']['threat_level']))
-        print('threat_score: {}'.format(summary_dict['data']['summary']['threat_score']))
+        level = summary_dict['data']['summary']['threat_level']
+        score = summary_dict['data']['summary']['threat_score']
 
         # multi
         multi_dict = tb.get_multiengines(sha256)
@@ -200,17 +205,24 @@ def remote_engine(limit=20):
             return -1
 
         engines = multi_dict['data']['multiengines']
-        print('ratio: {}/{}'.format(len([key for key in engines if engines[key] == 'safe']), len(engines)))
 
-        # bytez = interface.fetch_file(sha256)
-        # label = interface.get_label_local(bytez)
-        # if label == 0.0:
-        #     benign.append(sha256)
-        #     interface.delete_file(sha256)
-        # else:
-        #     malware.append(sha256)
+        print('{} -> level: {}, score: {}, ratio: {}/{}'.format(
+            sha256, level, score,
+            len([key for key in engines if engines[key] == 'safe']),
+            len(engines)))
 
-    print('malware:{}, benign:{}'.format(malware.__len__(), benign.__len__()))
+        if level == 'malicious':
+            malware.append(sha256)
+        else:
+            benign.append(sha256)
+
+    print('malware:{}, benign:{}, crash:{}'.format(len(malware), len(benign), len(crash)))
 
 if __name__ == '__main__':
-    remote_engine()
+    remote_engine(5)
+
+    # 该样本始终报错，已发邮件联系客服：Backdoor.Win32.PcClient.jvc
+    # tb = ThreatBook()
+    # print(tb.upload('Backdoor.Win32.PcClient.jvc'))
+    # print(tb.get_report('42405f0b77d4b4f6c3ebf0948006c8b549203801dc80f99c84cfa160d2e714c6'))
+    # {'status_code': -1, 'data': None, 'msg': 'GET_SANDBOX_REPORT_ERROR'}
