@@ -1,17 +1,12 @@
-﻿import requests
+﻿import os
 
-API_KEY = '54a104603aad46c9bc02917b952e273846d8748ddd6247e09f845bfb16d8ed10'
-SANDBOX_TYPE = 'win7_sp1_enx86_office2013'
-
+import requests
+from gym_malware.envs.utils import interface
 
 class ThreatBook(object):
-
-    def __init__(self, api_key):
-        self.api_key = api_key
-        self.sandbox_type = SANDBOX_TYPE
-
-    def __repr__(self):
-        return "<ThreatBook proxy>"
+    def __init__(self):
+        self.api_key = '54a104603aad46c9bc02917b952e273846d8748ddd6247e09f845bfb16d8ed10'
+        self.sandbox_type = 'win7_sp1_enx86_office2013'
 
     # 提交文件并分析
     def upload(self, file_name):
@@ -63,7 +58,7 @@ class ThreatBook(object):
 def main():
     file_name = 'win32.pe.samples'
 
-    tb = ThreatBook(API_KEY)
+    tb = ThreatBook()
     result_dict = tb.upload(file_name)
     # {
     #     "msg": "OK",
@@ -78,7 +73,6 @@ def main():
     sha256 = result_dict['sha256']
 
     # summary
-    print("======summary======")
     summary_dict = tb.get_summary(sha256)
 
     if summary_dict['msg'] != 'OK':
@@ -114,7 +108,6 @@ def main():
     # }
 
     # multi
-    print("======multi======")
     multi_dict = tb.get_multiengines(sha256)
 
     if multi_dict['msg'] != 'OK':
@@ -151,5 +144,73 @@ def main():
     #     "vbwebshell": "safe"
     # }
 
+
+# 使用本地引擎统计sample里样本组成情况
+def local_engine():
+    sha_list = interface.get_available_sha256()
+    malware = []
+    benign = []
+    for sha256 in sha_list:
+        bytez = interface.fetch_file(sha256)
+        label = interface.get_label_local(bytez)
+        if label == 0.0:
+            benign.append(sha256)
+            interface.delete_file(sha256)
+        else:
+            malware.append(sha256)
+
+    print('malware:{}, benign:{}'.format(malware.__len__(), benign.__len__()))
+
+
+# 使用远程引擎统计sample里样本组成情况
+def remote_engine(limit=20):
+    sha_list = interface.get_available_sha256()
+    malware = []
+    benign = []
+    for sha256 in sha_list:
+        file_path = os.path.join(interface.SAMPLE_PATH, sha256)
+
+        limit -= 1
+        if limit < 0:
+            break
+
+        tb = ThreatBook()
+        result_dict = tb.upload(file_path)
+        if result_dict['msg'] != 'OK':
+            print("upload error!")
+            continue
+
+        sha256 = result_dict['sha256']
+
+        # summary
+        summary_dict = tb.get_summary(sha256)
+
+        if summary_dict['msg'] != 'OK':
+            print(summary_dict)
+            continue
+
+        print('threat_level: {}'.format(summary_dict['data']['summary']['threat_level']))
+        print('threat_score: {}'.format(summary_dict['data']['summary']['threat_score']))
+
+        # multi
+        multi_dict = tb.get_multiengines(sha256)
+
+        if multi_dict['msg'] != 'OK':
+            print("multi error!")
+            return -1
+
+        engines = multi_dict['data']['multiengines']
+        print('ratio: {}/{}'.format(len([key for key in engines if engines[key] == 'safe']), len(engines)))
+
+        # bytez = interface.fetch_file(sha256)
+        # label = interface.get_label_local(bytez)
+        # if label == 0.0:
+        #     benign.append(sha256)
+        #     interface.delete_file(sha256)
+        # else:
+        #     malware.append(sha256)
+
+    print('malware:{}, benign:{}'.format(malware.__len__(), benign.__len__()))
+
 if __name__ == '__main__':
-    main()
+    remote_engine()
