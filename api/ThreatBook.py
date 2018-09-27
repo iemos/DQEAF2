@@ -3,6 +3,7 @@
 API_KEY = '54a104603aad46c9bc02917b952e273846d8748ddd6247e09f845bfb16d8ed10'
 SANDBOX_TYPE = 'win7_sp1_enx86_office2013'
 
+
 class ThreatBook(object):
 
     def __init__(self, api_key):
@@ -13,12 +14,6 @@ class ThreatBook(object):
         return "<ThreatBook proxy>"
 
     # 提交文件并分析
-    # {
-    #     "msg": "OK",
-    #     "response_code": 0,
-    #     "sha256": "3b7e88dea3d358744345f9a18cfb06edf858b5a6c72a91e7ddf92202cc244a02",
-    #     "permalink": "https://s.threatbook.cn/report/file/3b7e88dea3d358744345f9a18cfb06edf858b5a6c72a91e7ddf92202cc244a02/?sign=history&env=win7_sp1_enx86_office2013"
-    # }
     def upload(self, file_name):
         url = 'https://s.threatbook.cn/api/v2/file/upload'
         fields = {
@@ -43,6 +38,44 @@ class ThreatBook(object):
         print(response.json())
 
     # 获取文件的概要信息
+    def get_summary(self, sha256):
+        url = 'https://s.threatbook.cn/api/v2/file/report/summary'
+        params = {
+            'apikey': self.api_key,
+            'sandbox_type': self.sandbox_type,
+            'sha256': sha256
+        }
+        response = requests.get(url, params=params)
+        print(response.json())
+
+    # 获取文件的多引擎检测报告
+    def get_multiengines(self, sha256):
+        url = 'https://s.threatbook.cn/api/v2/file/report/multiengines'
+        params = {
+            'apikey': self.api_key,
+            'sandbox_type': self.sandbox_type,
+            'sha256': sha256
+        }
+        response = requests.get(url, params=params)
+        print(response.json())
+
+
+if __name__ == "__main__":
+    file_name = 'win32.pe.samples'
+
+    tb = ThreatBook(API_KEY)
+    result_dict = tb.upload(file_name)
+    # {
+    #     "msg": "OK",
+    #     "response_code": 0,
+    #     "sha256": "3b7e88dea3d358744345f9a18cfb06edf858b5a6c72a91e7ddf92202cc244a02",
+    #     "permalink": "https://s.threatbook.cn/report/file/3b7e88dea3d358744345f9a18cfb06edf858b5a6c72a91e7ddf92202cc244a02/?sign=history&env=win7_sp1_enx86_office2013"
+    # }
+    sha256 = result_dict['sha256']
+
+    # summary
+    print("============")
+    tb.get_summary(sha256)
     # {
     #     "status_code": 0,
     #     "data": {
@@ -68,17 +101,10 @@ class ThreatBook(object):
     #     },
     #     "msg": "OK"
     # }
-    def get_summary(self, sha256):
-        url = 'https://s.threatbook.cn/api/v2/file/report/summary'
-        params = {
-            'apikey': self.api_key,
-            'sandbox_type': self.sandbox_type,
-            'sha256': sha256
-        }
-        response = requests.get(url, params=params)
-        print(response.json())
 
-    # 获取文件的多引擎检测报告
+    # multi
+    print("============")
+    tb.get_multiengines(sha256)
     # {
     #     "AVG": "safe",
     #     "Antiy": "safe",
@@ -106,20 +132,3 @@ class ThreatBook(object):
     #     "Tencent": "Msil.Backdoor.Agent.Lneq",
     #     "vbwebshell": "safe"
     # }
-    def get_multiengines(self, sha256):
-        url = 'https://s.threatbook.cn/api/v2/file/report/multiengines'
-        params = {
-            'apikey': self.api_key,
-            'sandbox_type': self.sandbox_type,
-            'sha256': sha256
-        }
-        response = requests.get(url, params=params)
-        print(response.json())
-
-if __name__ == "__main__":
-    file_name = 'win32.pe.samples'
-
-    tb = ThreatBook(API_KEY)
-    result_dict = tb.upload(file_name)
-    sha256 = result_dict['sha256']
-    tb.get_summary(sha256)
