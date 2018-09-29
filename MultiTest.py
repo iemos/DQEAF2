@@ -56,7 +56,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     count = multiprocessing.Value("d", )
-    print('测试数目：{}.\n'.format(args.number))
     time = datetime.datetime.now()
     with open(path, 'a+') as f:
         f.write("多线程测试: start time is {} \n".format(time))
