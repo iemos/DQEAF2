@@ -57,8 +57,6 @@ if __name__ == '__main__':
 
     count = multiprocessing.Value("d", )
     time = datetime.datetime.now()
-    with open(path, 'a+') as f:
-        f.write("多线程测试: start time is {} \n".format(time))
 
     for i in range(args.number):
         test_process['Process' + str(i)] = Process(target=test, args=(i,))
@@ -76,8 +74,8 @@ if __name__ == '__main__':
 
     print('Process end.')
     time = datetime.datetime.now()
-    with open(path, 'a+') as f:
-        f.write("多线程测试: end time is {} \n".format(time))
-        f.write("成功个数为: {} / {} \n".format(counter.value, args.number))
+    # with open(path, 'a+') as f:
+    #     f.write("多线程测试: end time is {} \n".format(time))
+    #     f.write("成功个数为: {} / {} \n".format(counter.value, args.number))
 
     print("counter= {}".format(counter.value))
