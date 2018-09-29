@@ -38,17 +38,17 @@ def test(id):
             time.sleep(3.5)
             R += reward
             if done:
+                step += 1
                 with lock:
                     counter.value += step
+                end = datetime.datetime.now()
+                process_time = end - start
+                logger.info("Process {} runs {} with {} steps.\n".format(id, process_time, step))
+                with open(path, 'a+') as f:
+                    f.write("Process {} runs {} with {} steps.\n".format(id, process_time, step))
                 break
     except Exception as e:
         logger.info(e)
-
-    end = datetime.datetime.now()
-    process_time = end - start
-    logger.info("Process {} runs {} with {} steps.\n".format(id, process_time, step))
-    with open(path, 'a+') as f:
-        f.write("Process {} runs {} with {} steps.\n".format(id, process_time, step))
 
 
 if __name__ == '__main__':
