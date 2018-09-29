@@ -32,14 +32,13 @@ def test(id):
     _ = env.reset()
     R = 0
     try:
-        for step in range(10):
+        for step in range(60):
+            with lock:
+                counter.value += 1
             action = env.action_space.sample()
             observation, reward, done, info = env.step(action)
             R += reward
             if done:
-                if reward > 0:
-                    with lock:
-                        counter.value += 1
                 break
     except Exception as e:
         logger.info(e)
@@ -53,7 +52,7 @@ def test(id):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--number', type=int, default=10)
+    parser.add_argument('--number', type=int, default=100)
     args = parser.parse_args()
 
     count = multiprocessing.Value("d", )
@@ -81,3 +80,5 @@ if __name__ == '__main__':
     with open(path, 'a+') as f:
         f.write("多线程测试: end time is {} \n".format(time))
         f.write("成功个数为: {} / {} \n".format(counter.value, args.number))
+
+    print("counter= {}".format(counter.value))
