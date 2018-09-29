@@ -35,6 +35,7 @@ def test(id):
         for step in range(60):
             action = env.action_space.sample()
             observation, reward, done, info = env.step(action)
+            time.sleep(3.5)
             R += reward
             if done:
                 with lock:
