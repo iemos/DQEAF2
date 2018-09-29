@@ -35,7 +35,7 @@ def test(id):
         for step in range(60):
             action = env.action_space.sample()
             observation, reward, done, info = env.step(action)
-            time.sleep(3.5)
+            time.sleep(3)
             R += reward
             if done:
                 step += 1
@@ -52,13 +52,13 @@ def test(id):
 
 
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--number', type=int, default=100)
     args = parser.parse_args()
 
-    time = datetime.datetime.now()
     with open(path, 'a+') as f:
-        f.write("start time is {} \n".format(time))
+        f.write("start time is {} \n".format(datetime.datetime.now()))
 
     for i in range(args.number):
         test_process['Process' + str(i)] = Process(target=test, args=(i,))
@@ -75,8 +75,7 @@ if __name__ == '__main__':
             f.write('Process {} exit.\n'.format(i))
 
     print('Process end.')
-    time = datetime.datetime.now()
     with open(path, 'a+') as f:
-        f.write("end time is {} \n".format(time))
+        f.write("end time is {} \n".format(datetime.datetime.now()))
 
     print("counter= {}".format(counter.value))
