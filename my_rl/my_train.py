@@ -56,8 +56,6 @@ def train_agent(agent, env, steps, outdir, max_episode_len=None,
             # o_{t+1}, r_{t+1}
             obs, r, done, info = env.step(action)
             t += 1
-            if r > 0:
-                r = 10 - episode_len / 6
             episode_r += r
             episode_len += 1
 
