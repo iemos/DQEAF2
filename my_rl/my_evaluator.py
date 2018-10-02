@@ -1,9 +1,11 @@
 # coding=UTF-8
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
+
 from builtins import *  # NOQA
+
 from future import standard_library
 
 standard_library.install_aliases()
@@ -15,11 +17,8 @@ import statistics
 import time
 import datetime
 import gym
-from gym_malware import sha256_holdout, MAXTURNS
-from gym_malware.envs.controls import manipulate2 as manipulate
-from gym_malware.envs.utils import pefeatures, interface
 
-from multiprocessing import Pool, Process, Value, Lock
+from multiprocessing import Process
 
 import numpy as np
 
