@@ -62,7 +62,7 @@ def test(id, agent, scores, steps, max_episode_len=None, explorer=None):
         t += 1
     agent.stop_episode()
     if test_r > 0:
-        test_r = 1
+        test_r = 10
     scores[id] = float(test_r)
     steps[id] = t
 
