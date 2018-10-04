@@ -87,7 +87,7 @@ def run_evaluation_episodes(env, agent, n_runs, count, max_episode_len=None,
     scores = mp.Array('f', np.zeros(n_runs))
     steps = mp.Array('i', np.zeros((n_runs,), dtype=np.int))
     with open(path, 'a+') as f:
-        f.write("start test {}: start time is {}\n".format(count, datetime.datetime.now()))
+        f.write("start test {}: start time is {} \n".format(count, datetime.datetime.now()))
 
     for i in range(n_runs):
         test_process['Process' + str(i)] = Process(target=test,
@@ -100,7 +100,8 @@ def run_evaluation_episodes(env, agent, n_runs, count, max_episode_len=None,
 
     with open(path, 'a+') as f:
         f.write("end test {}: end time is {} \n".format(count, datetime.datetime.now()))
-        f.write("scores is {} \n".format(statistics.mean(scores)))
+        f.write("end test {}: end time is {} \n".format(count, datetime.datetime.now()))
+        f.write("scores is {}\n".format(statistics.mean(scores)))
     test_hooks[0](env, agent, count, statistics.mean(scores) / 10)
     return scores
 
