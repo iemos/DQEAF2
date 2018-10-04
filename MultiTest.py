@@ -35,7 +35,6 @@ def test(id):
         for step in range(60):
             action = env.action_space.sample()
             observation, reward, done, info = env.step(action)
-            time.sleep(3)
             R += reward
             if done:
                 step += 1
@@ -54,7 +53,7 @@ def test(id):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--number', type=int, default=100)
+    parser.add_argument('--number', type=int, default=3)
     args = parser.parse_args()
 
     with open(path, 'a+') as f:
