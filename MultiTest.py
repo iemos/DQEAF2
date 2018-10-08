@@ -30,7 +30,7 @@ def test(id, scores):
     logger.info("run process {} ....\n".format(id))
     start = datetime.datetime.now()
     env = gym.make(TEST_NAME)
-    _ = env.reset()
+    _ = env.reset(id)
     R = 0
     try:
         for step in range(60):
