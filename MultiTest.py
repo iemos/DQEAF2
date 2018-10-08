@@ -3,9 +3,7 @@ import gym
 import threading
 import time
 import logging
-from gym_malware import sha256_holdout, MAXTURNS
-from gym_malware.envs.controls import manipulate2 as manipulate
-from gym_malware.envs.utils import pefeatures, interface
+from gym_malware.envs import malware_env
 from multiprocessing import Pool, Process, Value, Lock
 import multiprocessing
 import os
