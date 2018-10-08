@@ -2,5 +2,5 @@ kpid python
 git pull
 source activate fzy
 nohup python -m visdom.server -p 8888 &
-python train.py
+nohup python train.py --steps 30000 &
 nvidia-smi
