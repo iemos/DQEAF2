@@ -20,7 +20,7 @@ test_process = locals()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-path = "test_log.txt"
+path = "Multi_test_log.txt"
 
 
 def test(id, scores):
