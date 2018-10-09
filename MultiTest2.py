@@ -68,7 +68,8 @@ if __name__ == '__main__':
 
     for i in range(args.number):
         env.reset()
-        env = copy.copy(env)
+        env_temp = copy.copy(env)
+        env = copy.copy(env_temp)
         test_process['Process' + str(i)] = Process(target=test, args=(i, scores, env))
         test_process.get('Process' + str(i)).start()
 
