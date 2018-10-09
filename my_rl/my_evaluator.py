@@ -21,6 +21,7 @@ import gym
 from multiprocessing import Process
 
 import numpy as np
+import copy
 
 """Columns that describe information about an experiment.
 
@@ -43,9 +44,7 @@ path = "test_log.txt"
 TEST_NAME = 'malware-test-v0'
 
 
-def test(id, agent, scores, steps, max_episode_len=None, explorer=None):
-    env = gym.make(TEST_NAME)
-    obs = env.reset()
+def test(id, env, obs, agent, scores, steps, max_episode_len=None, explorer=None):
     done = False
     test_r = 0
     t = 0
@@ -91,12 +90,18 @@ def run_evaluation_episodes(env, agent, n_runs, count, max_episode_len=None,
     # logger = logger or logging.getLogger(__name__)
     scores = mp.Array('f', np.zeros(n_runs))
     steps = mp.Array('i', np.zeros((n_runs,), dtype=np.int))
+
+    env = gym.make(TEST_NAME)
+
     with open(path, 'a+') as f:
         f.write("start test {}: start time is {} \n".format(count, datetime.datetime.now()))
 
     for i in range(n_runs):
+        obs = env.reset()
+        env_temp = copy.copy(env)
+        env = copy.copy(env_temp)
         test_process['Process' + str(i)] = Process(target=test,
-                                                   args=(i, agent, scores, steps, max_episode_len, explorer))
+                                                   args=(i, env_temp, obs, agent, scores, steps, max_episode_len, explorer))
         test_process.get('Process' + str(i)).start()
 
     for i in range(n_runs):
