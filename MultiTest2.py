@@ -56,7 +56,7 @@ def test(id, scores, env):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--number', type=int, default=200)
+    parser.add_argument('--number', type=int, default=100)
     args = parser.parse_args()
 
     scores = multiprocessing.Array('f', numpy.zeros(args.number))
@@ -67,8 +67,8 @@ if __name__ == '__main__':
         f.write("start time is {} \n".format(datetime.datetime.now()))
 
     for i in range(args.number):
-        env = copy.copy(env)
         env.reset()
+        env = copy.copy(env)
         test_process['Process' + str(i)] = Process(target=test, args=(i, scores, env))
         test_process.get('Process' + str(i)).start()
 
@@ -76,11 +76,11 @@ if __name__ == '__main__':
     with open(path, 'a+') as f:
         f.write('Wait all processed end.\n')
 
-    # for i in range(args.number):
-    #     test_process.get('Process' + str(i)).join()
-    #     print('Process {} exit.\n'.format(i))
-    #     with open(path, 'a+') as f:
-    #         f.write('Process {} exit.\n'.format(i))
+    for i in range(args.number):
+        test_process.get('Process' + str(i)).join()
+        print('Process {} exit.\n'.format(i))
+        with open(path, 'a+') as f:
+            f.write('Process {} exit.\n'.format(i))
 
     print('Process end.')
     with open(path, 'a+') as f:
