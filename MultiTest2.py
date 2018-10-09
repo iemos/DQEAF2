@@ -56,7 +56,7 @@ def test(id, scores, env):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--number', type=int, default=3)
+    parser.add_argument('--number', type=int, default=100)
     args = parser.parse_args()
 
     scores = multiprocessing.Array('f', numpy.zeros(args.number))
@@ -70,7 +70,7 @@ if __name__ == '__main__':
         env.reset()
         env_temp = copy.copy(env)
         env = copy.copy(env_temp)
-        test_process['Process' + str(i)] = Process(target=test, args=(i, scores, env))
+        test_process['Process' + str(i)] = Process(target=test, args=(i, scores, env_temp))
         test_process.get('Process' + str(i)).start()
 
     print('Wait all processed end.\n')
