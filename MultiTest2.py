@@ -56,7 +56,7 @@ def test(id, scores, env):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--number', type=int, default=100)
+    parser.add_argument('--number', type=int, default=3)
     args = parser.parse_args()
 
     scores = multiprocessing.Array('f', numpy.zeros(args.number))
