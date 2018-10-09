@@ -3,7 +3,8 @@
 **DQEAF**:Deep Q-network anti-malware Engines Attacking Framework
 
 ## TODO
+1. 优化action和obs
 1. lby: 其他框架代码
-2. lby: 规避pe源文件
-3. fzy: 提出原来分类器
-4. fzy: 监督学习
+1. lby: 规避pe源文件
+1. fzy: 提出原来分类器
+1. fzy: 监督学习
