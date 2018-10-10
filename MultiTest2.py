@@ -83,9 +83,11 @@ if __name__ == '__main__':
 
     delete("Sample/original")
     delete("Sample/modification")
-
-    os.remove("history_log.txt")
-    os.remove("process_log.txt")
+    if os.path.exists("history_log.txt"):
+        os.remove("history_log.txt")
+    if os.path.exists("process_log.txt"):
+        os.remove("process_log.txt")
+        
     env = gym.make(TEST_NAME)
 
     start = datetime.datetime.now()
