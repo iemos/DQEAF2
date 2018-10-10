@@ -40,9 +40,16 @@ _basic_columns = ('steps', 'episodes', 'elapsed', 'mean',
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 test_process = locals()
-path = "test_log.txt"
+process_path = "process_log.txt"
+history_path = "history_log.txt"
 TEST_NAME = 'malware-test-v0'
 
+
+def delete(path):
+    ls = os.listdir(path)
+    for i in ls:
+        c_path = os.path.join(path, i)
+        os.remove(c_path)
 
 def test(id, env, obs, agent, scores, steps, max_episode_len=None, explorer=None):
     done = False
@@ -63,8 +70,23 @@ def test(id, env, obs, agent, scores, steps, max_episode_len=None, explorer=None
     score = 0
     if test_r > 0:
         score = 10
-    with open(path, 'a+') as f:
+    with open(process_path, 'a+') as f:
         f.write("Test {}  reward = {}  score = {} \n".format(id, test_r, score))
+
+    with open(history_path, 'a+') as f:
+        k = []
+        v = []
+        for temp_k, temp_v in env.history.items():
+            k = temp_k
+            v = temp_v
+
+        if v['evaded']:
+            f.write("{}:{}->success\n".format(id, k))
+            f.write("actions are: {}\n\n".format(v['actions']))
+        else:
+            f.write("{}:{}->fail\n".format(id, k))
+            f.write("actions are: {}\n\n".format(v['actions']))
+
     scores[id] = float(score)
     steps[id] = t
 
@@ -91,13 +113,21 @@ def run_evaluation_episodes(env, agent, n_runs, count, max_episode_len=None,
     scores = mp.Array('f', np.zeros(n_runs))
     steps = mp.Array('i', np.zeros((n_runs,), dtype=np.int))
 
+    delete("Sample/original")
+    delete("Sample/modification")
+    if os.path.exists("history_log.txt"):
+        os.remove("history_log.txt")
+    if os.path.exists("process_log.txt"):
+        os.remove("process_log.txt")
+
     env = gym.make(TEST_NAME)
 
-    with open(path, 'a+') as f:
-        f.write("start test {}: start time is {} \n".format(count, datetime.datetime.now()))
+    start = datetime.datetime.now()
+    with open(process_path, 'a+') as f:
+        f.write("start test {}: start time is {} \n".format(count, start))
 
-    with open(path, 'a+') as f:
-        f.write("wait all porcess end \n")
+    # with open(process_path, 'a+') as f:
+    #     f.write("wait all porcess end \n")
 
     for i in range(n_runs):
         obs = env.reset()
@@ -107,14 +137,19 @@ def run_evaluation_episodes(env, agent, n_runs, count, max_episode_len=None,
                                                    args=(i, env_temp, obs, agent, scores, steps, max_episode_len, explorer))
         test_process.get('Process' + str(i)).start()
 
+    with open(process_path, 'a+') as f:
+        f.write('Wait all processed end.\n')
+
     for i in range(n_runs):
         test_process.get('Process' + str(i)).join()
         test_hooks[1](env, agent, count * n_runs + i, steps[i])
 
-    with open(path, 'a+') as f:
-        f.write("end test {}: end time is {} \n".format(count, datetime.datetime.now()))
-        f.write("end test {}: end time is {} \n".format(count, datetime.datetime.now()))
+    end = datetime.datetime.now()
+    with open(process_path, 'a+') as f:
+        f.write("end test {}: end time is {} \n".format(count, end))
+        f.write("total time is {} \n".format(end - start))
         f.write("scores is {}\n".format(statistics.mean(scores)))
+
     test_hooks[0](env, agent, count, statistics.mean(scores) / 10)
     return scores
 
