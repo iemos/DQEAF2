@@ -96,6 +96,9 @@ def run_evaluation_episodes(env, agent, n_runs, count, max_episode_len=None,
     with open(path, 'a+') as f:
         f.write("start test {}: start time is {} \n".format(count, datetime.datetime.now()))
 
+    with open(path, 'a+') as f:
+        f.write("wait all porcess end \n")
+
     for i in range(n_runs):
         obs = env.reset()
         env_temp = copy.copy(env)
