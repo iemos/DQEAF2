@@ -51,7 +51,7 @@ def main():
     parser.add_argument('--soft-update-tau', type=float, default=1e-2)
     parser.add_argument('--update-interval', type=int, default=1)
     parser.add_argument('--eval-n-runs', type=int, default=100)
-    parser.add_argument('--eval-interval', type=int, default=1000)
+    parser.add_argument('--eval-interval', type=int, default=100)
     parser.add_argument('--gamma', type=float, default=0.99)
     parser.add_argument('--minibatch-size', type=int, default=None)
     parser.add_argument('--test-random', action='store_true')
@@ -270,6 +270,10 @@ def main():
             print('Output files are saved in {}'.format(args.outdir))
             with open(log_path, 'a') as f:
                 f.write('Output files are saved in {}\n'.format(args.outdir))
+
+            # 删除actions的日志文件
+            if os.path.exists("history_log.txt"):
+                os.remove("history_log.txt")
 
             env, agent = train_agent(args)
 
