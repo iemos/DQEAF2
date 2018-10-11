@@ -23,7 +23,7 @@ from my_rl import my_train
 
 ACTION_LOOKUP = {i: act for i, act in enumerate(manipulate.ACTION_TABLE.keys())}
 
-net_layers = [1024, 256]
+net_layers = [256, 64]
 
 log_path = "log.txt"
 
