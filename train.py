@@ -220,7 +220,7 @@ def main():
         )
 
         # 保证训练一轮就成功的情况下能成功打印scores.txt文件
-        test_scores_hook(None, None, 1000)
+        # test_scores_hook(None, None, 1000)
 
         return env, agent
 

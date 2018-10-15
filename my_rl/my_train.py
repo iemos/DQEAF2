@@ -14,6 +14,9 @@ from my_rl import my_evaluator
 from chainerrl.experiments.evaluator import save_agent
 from chainerrl.misc.ask_yes_no import ask_yes_no
 from chainerrl.misc.makedirs import makedirs
+import copy
+
+path = "Obs_Log.txt"
 
 
 def save_agent_replay_buffer(agent, t, outdir, suffix='', logger=None):
@@ -40,6 +43,7 @@ def train_agent(agent, env, steps, outdir, max_episode_len=None,
 
     # o_0, r_0
     obs = env.reset()
+    last_obs = []
     r = 0
     done = False
 
@@ -53,8 +57,12 @@ def train_agent(agent, env, steps, outdir, max_episode_len=None,
 
             # a_t
             action = agent.act_and_train(obs, r)
+            # last_obs = copy.copy(obs)
             # o_{t+1}, r_{t+1}
             obs, r, done, info = env.step(action)
+            with open(path, 'a+') as f:
+                f.write("episode index is {}, length is {}, action is {}\n".format(episode_idx, episode_len, action))
+
             t += 1
             episode_r += r
             episode_len += 1
