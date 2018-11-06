@@ -1,15 +1,13 @@
-import datetime
-import gym
-import threading
-import time
-import logging
-from gym_malware.envs import malware_env
-from multiprocessing import Pool, Process, Value, Lock
-import multiprocessing
-import os
 import argparse
-import numpy
 import copy
+import datetime
+import logging
+import multiprocessing
+from multiprocessing import Process, Value, Lock
+
+import gym
+import numpy
+import gym_malware
 
 lock = Lock()
 counter = Value("i", 0)
@@ -23,7 +21,7 @@ process_path = "process_log.txt"
 history_path = "history_log.txt"
 
 
-def test(id, scores, env):
+def multi_test(id, scores, env):
     global lock, counter
     # with open(path, 'a+') as f:
     #     f.write("run process {} ....\n".format(id))
@@ -98,7 +96,7 @@ if __name__ == '__main__':
         env.reset()
         env_temp = copy.copy(env)
         env = copy.copy(env_temp)
-        test_process['Process' + str(i)] = Process(target=test, args=(i, scores, env_temp))
+        test_process['Process' + str(i)] = Process(target=multi_test, args=(i, scores, env_temp))
         test_process.get('Process' + str(i)).start()
 
     print('Wait all processed end.\n')

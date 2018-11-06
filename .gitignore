@@ -1,2 +1,6 @@
 models/*
 !models/.gitkeep
+logs
+Sample
+
+.idea
