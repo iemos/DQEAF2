@@ -32,6 +32,6 @@
 ## paper TODO
 1. **确定Action，根据Action确定Env**，lief修改，pe文件结构
 1. model architecture的选取
-1. 软件没有被损坏验证方法，武
+1. 软件没有被损坏验证方法，武思齐
 1. **evaluation交叉对比，sample多种类选取**，对比Xu，不对比Andersen
 1. 为什么SR上限是75%？剩下的25%为什么不能修改成功？
