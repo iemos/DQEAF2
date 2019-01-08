@@ -44,8 +44,10 @@ x_test_norm = x_test_norm / 10
 y_trains = np.array(y_train[:train])
 y_tests = np.array(y_train[train:])
 
-x_trainsOneHot = np_utils.to_categorical(y_trains)
+y_trainsOneHot = np_utils.to_categorical(y_trains)
 y_testsOneHot = np_utils.to_categorical(y_tests)
+print(x_test_norm.shape)
+print(y_testsOneHot.shape)
 
 model = Sequential()
 model.add(Dense(units=100, input_dim=2, kernel_initializer='normal', activation='relu'))
@@ -64,21 +66,21 @@ adam = optimizers.Adam(lr=1e-3, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.
 # amsgrad——是否应用此算法的AMSGrad变种
 model.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy', 'mae', 'acc'])
 
-train_history = model.fit(x_train_norm, x_trainsOneHot, batch_size=100, epochs=10, verbose=2, validation_split=0.2)
+train_history = model.fit(x_train_norm, y_trainsOneHot, batch_size=100, epochs=10, verbose=2, validation_split=0.2)
 
 scores = model.evaluate(x_test_norm, y_testsOneHot, verbose=1)
-print(scores[1])
+print(scores)
 
-model.save("models/MYKerasDemo_model.h5")  # 把训练好的模型保存下来
+# model.save("models/MYKerasDemo_model.h5")  # 把训练好的模型保存下来
 # model=load_model("/Volumes/Data/dp/MYKerasDemo_model.h5")#加载训练好的模型后续直接用于训练数据集
-predict = model.predict_classes(x_test_norm)
-# 模型训练好了，进行实际预测部署
-predict_classes = predict.reshape(-1)
-
-pd.crosstab(y_tests, predict_classes, rownames=['label'], colnames=['predict'])
-df = pd.DataFrame({'label': y_tests, 'predict': predict_classes})
-dx = (df[df.label != df.predict].index)[:]  # 把原始的数据其标签和实际预测不同的给标记出来
-
-print("{}/{}".format(len(dx), df.__len__()))
+# predict = model.predict_classes(x_test_norm)
+# # 模型训练好了，进行实际预测部署
+# predict_classes = predict.reshape(-1)
+#
+# pd.crosstab(y_tests, predict_classes, rownames=['label'], colnames=['predict'])
+# df = pd.DataFrame({'label': y_tests, 'predict': predict_classes})
+# dx = (df[df.label != df.predict].index)[:]  # 把原始的数据其标签和实际预测不同的给标记出来
+#
+# print("{}/{}".format(len(dx), df.__len__()))
 # for i in dx[:20]:
 #     print(y_tests[i], predict_classes[i])
