@@ -1,6 +1,7 @@
 import glob
 import os
 import sys
+import csv
 
 import numpy as np
 from keras import optimizers
@@ -61,24 +62,32 @@ def generate_label():
 
 
 # 根据label得到准确率
-def get_success_rate(action_index):
+def get_success_rate(data, label):
     # TODO: 根据action_index来调整生成的label
-    (x_train, y_train) = generate_label()
 
-    num = len(y_train)
-    train = int(num * 0.7)
+    num = len(label)
+    part = 0.9  # 取多少作为训练集
+    first = int(num*part/2)
+    second = int(num/2)
+    third = int(num/2 +first)
+    # print("first:{}, second:{},third:{}\n".format(first,second,third))
 
     # 划分训练集
-    x_train_norm = np.array(x_train[:train])
-    x_test_norm = np.array(x_train[train:])
+    x_train_norm = np.array(data[:first]+data[second:third])
+    x_test_norm = np.array(data[first:second]+data[third:])
 
-    y_trains = np.array(y_train[:train])
-    y_tests = np.array(y_train[train:])
+    y_trains = np.array(label[:first]+label[second:third])
+    y_tests = np.array(label[first:second]+label[third:])
+
+    # print(len(x_train_norm))
+    # print(len(x_test_norm))
+    # print(len(y_trains))
+    # print(len(y_tests))
 
     y_trainsOneHot = np_utils.to_categorical(y_trains, 2)
     y_testsOneHot = np_utils.to_categorical(y_tests, 2)
-    print(x_test_norm.shape)
-    print(y_testsOneHot.shape)
+    # print(x_test_norm.shape)
+    # print(y_testsOneHot.shape)
 
     model = Sequential()
     model.add(Dense(units=100, input_dim=9, kernel_initializer='normal', activation='relu'))
@@ -90,7 +99,7 @@ def get_success_rate(action_index):
     model.add(Dense(units=2, activation='softmax'))
     # model.add(Dense(units=2))
     # model.add(Softmax(axis=1))
-    print(model.summary())
+    # print(model.summary())
     # 优化器的选择：SGD,RMSprop,Adagrad,Adadelta,Adam,Adamax,Nadam(Nesterov版的Adam),TFOptimizer
     adam = optimizers.Adam(lr=1e-3, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
     # decay——每次参数更新后的学习率衰减值
@@ -106,5 +115,60 @@ def get_success_rate(action_index):
     return scores[1]
 
 
+def save_data(data, label, data_path, label_path):
+    if os.path.exists(data_path):
+        os.remove(data_path)
+    if os.path.exists(label_path):
+        os.remove(label_path)
+
+    with open(data_path, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        for i in range(len(data)):
+            if data[i]:
+                writer.writerow(data[i])
+            else:
+                label[i] = -1
+
+    with open(label_path, 'w') as f:
+        for i in label:
+            if i != -1:
+                f.write(str(i) + "\n")
+
+
+def load_data(data_path, label_path):
+    data = []
+    label = []
+
+    with open(data_path) as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=',')
+        for row in readCSV:
+            for i in range(len(row)):
+                if row[i] == 'True':
+                    row[i] = True
+                elif row[i] == 'False':
+                    row[i] = False
+                else:
+                    row[i] = int(row[i])
+            data.append(row)
+
+    with open(label_path, 'r') as f:
+        x = f.readlines()
+        for i in x:
+            i = i.strip('\n')
+            if (i == '1'):
+                i = 1
+            else:
+                i = 0
+            label.append(i)
+    return data, label
+
+
 if __name__ == '__main__':
-    get_success_rate()
+    #生成数据集
+    # data, label = generate_label()
+    # save_data(data, label, "data.csv", "label.txt")
+
+    data, label = load_data("data.csv", "label.txt")
+
+    score = get_success_rate(data, label)
+
