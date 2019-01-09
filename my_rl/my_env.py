@@ -1,5 +1,6 @@
-from my_rl.envs.utils.pefeatures import GeneralFileInfo
-from my_rl.envs.utils import interface
+from my_rl.utils.pefeatures import GeneralFileInfo
+from my_rl.utils import interface
+
 
 # Action space: -1,0,1,2,3,4,5,6,7,8,9
 
@@ -37,4 +38,4 @@ class MyEnv:
         return self.state
 
     def render(self):
-        print("This is me: {}".format(self.observation_space))
+        print("This is me: {}".format(self.state))
