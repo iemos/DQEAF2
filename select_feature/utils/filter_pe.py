@@ -1,6 +1,6 @@
 import lief
 
-from my_rl.utils import interface
+from select_feature.utils import interface
 
 # 本文件用于过滤样本中被lief判定为不是pe文件的文件（有点绕~），并删除
 # 从bytez字节parse，该方法只能使用lief 0.7版本

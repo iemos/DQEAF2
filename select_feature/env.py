@@ -1,14 +1,24 @@
-from my_rl.utils.pefeatures import GeneralFileInfo
-from my_rl.utils import interface
+from select_feature.utils.pefeatures import GeneralFileInfo
+from select_feature.utils import interface
+
+import random
 
 
-# Action space: -1,0,1,2,3,4,5,6,7,8,9
+# Action space: -1,0,1,2,3,4,5,6,7,8
 
+ACTION_SIZE = 10
+STATE_SIZE = 9
 
 # 暂时不用任何gym的东西
 class MyEnv:
     def __init__(self):
         self.reset()
+        self.state_size = STATE_SIZE
+        self.action_size = ACTION_SIZE
+
+    def random_action(self):
+        action = random.randint(-1,8)
+        return action
 
     def step(self, action_index):
         if action_index == -1:
@@ -22,7 +32,7 @@ class MyEnv:
         # reward 默认为0
         reward = 0
         if self.done == True:
-            reward = interface.get_success_rate(action_index)
+            reward = interface.get_success_rate(self.state)
 
         return self.state, self.done, reward
 

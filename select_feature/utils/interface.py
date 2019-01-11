@@ -10,7 +10,7 @@ from keras.layers import Dropout
 from keras.models import Sequential
 from keras.utils import np_utils
 
-from my_rl.utils.pefeatures import PEFeatureExtractor
+from select_feature.utils.pefeatures import PEFeatureExtractor
 
 module_path = os.path.dirname(os.path.abspath(sys.modules[__name__].__file__))
 
@@ -43,6 +43,7 @@ def delete_file(sample_path, sha256):
     location = os.path.join(sample_path, sha256)
     os.remove(location)
 
+
 # 生成label数据
 def generate_label():
     data = []
@@ -66,22 +67,35 @@ def generate_label():
 
 
 # 根据label得到准确率
-def get_success_rate(data, label):
-    # TODO: 根据action_index来调整生成的label
+def get_success_rate(state):
+    print("start get SR\nstate:{}".format(state))
+    data, label = load_data("data.csv", "label.txt")
+
+    count = len(state)
+    for i in reversed(range(len(state))):
+        if state[i] == 0:
+            count -= 1
+            if count == 0:
+                continue
+            for index in range(len(data)):
+                # print("current data is {}\ni = {}".format(data[index],i))
+                del data[index][i]
 
     num = len(label)
     part = 0.9  # 取多少作为训练集
-    first = int(num*part/2)
-    second = int(num/2)
-    third = int(num/2 +first)
+    first = int(num * part / 2)
+    second = int(num / 2)
+    third = int(num / 2 + first)
     # print("first:{}, second:{},third:{}\n".format(first,second,third))
 
     # 划分训练集
-    x_train_norm = np.array(data[:first]+data[second:third])
-    x_test_norm = np.array(data[first:second]+data[third:])
+    x_train_norm = np.array(data[:first] + data[second:third])
+    x_test_norm = np.array(data[first:second] + data[third:])
 
-    y_trains = np.array(label[:first]+label[second:third])
-    y_tests = np.array(label[first:second]+label[third:])
+    # print(x_test_norm)
+
+    y_trains = np.array(label[:first] + label[second:third])
+    y_tests = np.array(label[first:second] + label[third:])
 
     # print(len(x_train_norm))
     # print(len(x_test_norm))
@@ -94,7 +108,7 @@ def get_success_rate(data, label):
     # print(y_testsOneHot.shape)
 
     model = Sequential()
-    model.add(Dense(units=100, input_dim=9, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(units=100, input_dim=len(data[0]), kernel_initializer='normal', activation='relu'))
     model.add(Dropout(0.3))
     model.add(Dense(units=400, kernel_initializer='normal', activation='relu'))
     model.add(Dropout(0.3))
@@ -113,9 +127,6 @@ def get_success_rate(data, label):
     train_history = model.fit(x_train_norm, y_trainsOneHot, batch_size=100, epochs=10, verbose=2, validation_split=0.2)
 
     scores = model.evaluate(x_test_norm, y_testsOneHot, verbose=1)
-
-    print(scores[1])
-
     return scores[1]
 
 
@@ -168,11 +179,28 @@ def load_data(data_path, label_path):
 
 
 if __name__ == '__main__':
-    #生成数据集
+
+    for i in reversed(range(6)):
+        print(i)
+    # 生成数据集
     # data, label = generate_label()
     # save_data(data, label, "data.csv", "label.txt")
 
-    data, label = load_data("data.csv", "label.txt")
+    # data, label = load_data("data.csv", "label.txt")
 
-    score = get_success_rate(data, label)
+    # score = get_success_rate([1, 0, 0, 0, 1, 1, 1, 1, 1])
 
+    # a = []
+    # b = [1,2,3]
+    # c = [4,5,6]
+    # d = [7,8,9]
+    # e = [0,1,1]
+    # a.append(b)
+    # a.append(c)
+    # a.append(d)
+    #
+    # for i in e:
+    #     if i == 0:
+    #         for index in range(len(a)):
+    #             del a[index][i]
+    # print(a)
