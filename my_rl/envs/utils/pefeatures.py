@@ -309,7 +309,8 @@ class PEFeatureExtractor(object):
             # some kind of parsing problem, none of these feature extractors will work
             binary = None
             for fe in self.parsed_features:
-                featurevectors = fe.empty()
+                pass
+                # featurevectors = fe.empty()
         # except: # everything else (KeyboardInterrupt, SystemExit, ValueError):
         #     raise
 
@@ -320,8 +321,8 @@ class PEFeatureExtractor(object):
                 except(KeyboardInterrupt, SystemExit):
                     raise
                 except:
+                    pass
                     # some property was invalid or missing
-                    featurevectors = fe.empty()
-
+                    # featurevectors = fe.empty()
         return featurevectors
         # return np.concatenate(featurevectors)
