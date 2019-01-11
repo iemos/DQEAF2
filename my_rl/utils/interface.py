@@ -10,7 +10,7 @@ from keras.layers import Dropout
 from keras.models import Sequential
 from keras.utils import np_utils
 
-from my_rl.envs.utils.pefeatures import PEFeatureExtractor
+from my_rl.utils.pefeatures import PEFeatureExtractor
 
 module_path = os.path.dirname(os.path.abspath(sys.modules[__name__].__file__))
 
@@ -38,6 +38,10 @@ def get_available_sha256(sample_path):
     assert len(filelist) > 0, "no files found in {} with sha256 names".format(sample_path)
     return filelist
 
+
+def delete_file(sample_path, sha256):
+    location = os.path.join(sample_path, sha256)
+    os.remove(location)
 
 # 生成label数据
 def generate_label():
