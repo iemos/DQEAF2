@@ -17,7 +17,10 @@ class MyEnv:
         self.action_size = ACTION_SIZE
 
     def random_action(self):
-        action = random.randint(-1,8)
+        while True:
+            action = random.randint(-1,8)
+            if self.state[action] == 0 or action == -1:
+                break
         return action
 
     def step(self, action_index):

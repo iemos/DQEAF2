@@ -5,11 +5,14 @@ import chainer.links as L
 import numpy as np
 
 from chainer import optimizers
-from chainerrl import explorers, replay_buffer
-from select_feature import env as Env
-from select_feature.agent import double_dqn, dqn
+from chainerrl import replay_buffer, explorers
 
-MAX_EPISODE = 100
+from select_feature import explorer as Explorer
+from select_feature import env as Env
+from select_feature import agent as DDQN
+from select_feature import action_value as ActionValue
+
+MAX_EPISODE = 10
 
 net_layers = [64, 32]
 
@@ -22,14 +25,6 @@ net_layers = [64, 32]
 #    每一对state和action都有一个reward，这个reward应该和env返回的reward（也就是该模型的acc）和count有关。
 
 # 用这个逻辑替代原来的my_train的逻辑，只需要把agent加入即可，agent应该是不需要修改的
-
-def act(state):
-    return -1
-
-
-def stop_and_replay():
-    pass
-
 
 def main():
     class QFunction(chainer.Chain):
@@ -69,10 +64,8 @@ def main():
                 else:
                     x = f(x)
 
-            return chainerrl.action_value.DiscreteActionValue(x)
-
-    def replay_append(agent, S, A, reward, count):
-        pass
+            # return chainerrl.action_value.DiscreteActionValue(x)
+            return ActionValue.DiscreteActionValue(x)
 
     def train_agent(env, agent):
         for episode in range(MAX_EPISODE):
@@ -134,15 +127,15 @@ def main():
 
         phi = lambda x: x.astype(np.float32, copy=False)
 
-        agent = double_dqn.DoubleDQN(q_func, opt, rbuf, gamma=0.99,
-                                     explorer=explorer, replay_start_size=replay_start_size,
-                                     target_update_interval=10 ** 2,
-                                     update_interval=update_interval,
-                                     phi=phi, minibatch_size=minibatch_size,
-                                     target_update_method='hard',
-                                     soft_update_tau=1e-2,
-                                     episodic_update=False,
-                                     episodic_update_len=16)
+        agent = DDQN.DoubleDQN(q_func, opt, rbuf, gamma=0.99,
+                               explorer=explorer, replay_start_size=replay_start_size,
+                               target_update_interval=10 ** 2,
+                               update_interval=update_interval,
+                               phi=phi, minibatch_size=minibatch_size,
+                               target_update_method='hard',
+                               soft_update_tau=1e-2,
+                               episodic_update=False,
+                               episodic_update_len=16)
         return agent
 
     def train():

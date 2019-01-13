@@ -68,7 +68,7 @@ def generate_label():
 
 # 根据label得到准确率
 def get_success_rate(state):
-    print("start get SR\nstate:{}".format(state))
+    # print("start get SR\nstate:{}".format(state))
     data, label = load_data("data.csv", "label.txt")
 
     count = len(state)
