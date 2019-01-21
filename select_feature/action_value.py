@@ -70,13 +70,22 @@ class DiscreteActionValue(ActionValue):
 
     @cached_property
     def greedy_actions(self):
+        return chainer.Variable(
+            self.q_values.data.argmax(axis=1).astype(np.int32))
+
+    @cached_property
+    def greedy_actions_with_state(self):
         data = self.q_values.data.astype(np.int32)
         while True:
             action = np.argmax(data, axis=1)[0]
-            if self.state[action] == 1:
+            if action != len(self.state) and self.state[action] == 1:
                 data[0][action] = -1
             else:
                 break
+        # if action == len(self.state):
+        #     action = -1
+
+        # print("q is {}, action is {}".format(data, action))
 
         return chainer.Variable(np.array([action]).astype(np.int32))
         # return chainer.Variable(np.array([-1]).astype(np.int32))

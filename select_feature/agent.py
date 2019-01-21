@@ -6,18 +6,20 @@ from __future__ import absolute_import
 from chainer import cuda
 import numpy as np
 from future import standard_library
+
 standard_library.install_aliases()
 
 import chainer
 
 from chainerrl.agents import double_dqn
 
+
 class DoubleDQN(double_dqn.DoubleDQN):
     def act(self, state):
         with chainer.using_config('train', False):
             with chainer.no_backprop_mode():
                 action_value = self.model(
-                    self.batch_states([np.array(state)], self.xp, self.phi))
+                    self.batch_states([state], self.xp, self.phi))
                 q = float(action_value.max.data)
                 action = cuda.to_cpu(action_value.greedy_actions.data)[0]
 
@@ -60,12 +62,14 @@ class DoubleDQN(double_dqn.DoubleDQN):
         with chainer.using_config('train', False):
             with chainer.no_backprop_mode():
                 action_value = self.model(
-                    self.batch_states([np.array(state)], self.xp, self.phi))
+                    self.batch_states([state], self.xp, self.phi))
                 action_value.load_state(state)
                 q = float(action_value.max.data)
                 # print("q is {}".format(q))
-                greedy_action = cuda.to_cpu(action_value.greedy_actions.data)[
+                greedy_action = cuda.to_cpu(action_value.greedy_actions_with_state.data)[
                     0]
+                # if greedy_action == len(state):
+                #     greedy_action = -1
                 # greedy_action = action_value.greedy_actions()
                 # print(chainer.Variable(action_value.q_values.data.argmax(axis=1).astype(np.int32)))
                 # print("greedy action is {}".format(greedy_action))
@@ -76,4 +80,4 @@ class DoubleDQN(double_dqn.DoubleDQN):
         action = self.explorer.select_action(
             self.t, lambda: greedy_action, action_value=action_value)
 
-        return action
+        return action, action_value.q_values.data.astype(np.int32)

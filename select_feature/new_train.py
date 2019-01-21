@@ -3,6 +3,7 @@ import chainer
 import chainer.functions as F
 import chainer.links as L
 import numpy as np
+import random
 
 from chainer import optimizers
 from chainerrl import replay_buffer, explorers
@@ -12,7 +13,7 @@ from select_feature import env as Env
 from select_feature import agent as DDQN
 from select_feature import action_value as ActionValue
 
-MAX_EPISODE = 10
+MAX_EPISODE = 100
 
 net_layers = [64, 32]
 
@@ -77,10 +78,10 @@ def main():
             while terminal == False:
                 # 此处保存的是上一轮的state，即保存的是state和针对该state选择的action
                 S.append(state)
-                action = agent.act_without_train(state)  # 此处action是否合法（即不能重复选取同一个指标）由agent判断。env默认得到的action合法。
+                action, q = agent.act_without_train(state)  # 此处action是否合法（即不能重复选取同一个指标）由agent判断。env默认得到的action合法。
                 A.append(action)
 
-                print("episode:{}, action:{}".format(episode, action))
+                print("episode:{}, action:{}, q:{}".format(episode, action, q))
 
                 state, terminal, reward = env.step(action)
                 if terminal:
@@ -107,7 +108,7 @@ def main():
         q_func = QFunction(state_size, action_size)
 
         start_epsilon = 1.0
-        end_epsilon = 0.1
+        end_epsilon = 0.3
         decay_steps = 100
         explorer = explorers.LinearDecayEpsilonGreedy(
             start_epsilon, end_epsilon, decay_steps,
@@ -117,10 +118,10 @@ def main():
         opt.setup(q_func)
 
         rbuf_capacity = 5 * 10 ** 3
-        minibatch_size = 32
+        minibatch_size = 16
 
         steps = 1000
-        replay_start_size = 50
+        replay_start_size = 20
         update_interval = 10
         betasteps = (steps - replay_start_size) // update_interval
         rbuf = replay_buffer.PrioritizedReplayBuffer(rbuf_capacity, betasteps=betasteps)
@@ -129,7 +130,7 @@ def main():
 
         agent = DDQN.DoubleDQN(q_func, opt, rbuf, gamma=0.99,
                                explorer=explorer, replay_start_size=replay_start_size,
-                               target_update_interval=10 ** 2,
+                               target_update_interval=10,  # target q网络多久和q网络同步
                                update_interval=update_interval,
                                phi=phi, minibatch_size=minibatch_size,
                                target_update_method='hard',
