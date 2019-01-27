@@ -3,9 +3,10 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 from builtins import *  # NOQA
+
+from chainerrl.action_value import ActionValue
 from future import standard_library
 from future.utils import with_metaclass
-
 standard_library.install_aliases()
 
 from abc import ABCMeta
@@ -20,37 +21,6 @@ from chainer import functions as F
 import numpy as np
 
 from chainerrl.misc.chainer_compat import matmul_v3
-
-
-class ActionValue(with_metaclass(ABCMeta, object)):
-    """Struct that holds state-fixed Q-functions and its subproducts.
-
-    Every operation it supports is done in a batch manner.
-    """
-
-    @abstractproperty
-    def greedy_actions(self):
-        """Get argmax_a Q(s,a)."""
-        raise NotImplementedError()
-
-    @abstractproperty
-    def max(self):
-        """Evaluate max Q(s,a)."""
-        raise NotImplementedError()
-
-    @abstractmethod
-    def evaluate_actions(self, actions):
-        """Evaluate Q(s,a) with a = given actions."""
-        raise NotImplementedError()
-
-    @abstractproperty
-    def params(self):
-        """Learnable parameters of this action value.
-
-        Returns:
-            tuple of chainer.Variable
-        """
-        raise NotImplementedError()
 
 
 class DiscreteActionValue(ActionValue):

@@ -1,17 +1,13 @@
-import chainerrl
 import chainer
 import chainer.functions as F
 import chainer.links as L
 import numpy as np
-import random
-
 from chainer import optimizers
 from chainerrl import replay_buffer, explorers
 
-from select_feature import explorer as Explorer
-from select_feature import env as Env
-from select_feature import agent as DDQN
 from select_feature import action_value as ActionValue
+from select_feature import agent as DDQN
+from select_feature import env as Env
 
 MAX_EPISODE = 100
 
@@ -65,7 +61,6 @@ def main():
                 else:
                     x = f(x)
 
-            # return chainerrl.action_value.DiscreteActionValue(x)
             return ActionValue.DiscreteActionValue(x)
 
     def train_agent(env, agent):
